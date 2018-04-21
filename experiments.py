@@ -31,7 +31,7 @@ class Dataset(object):
         self.transfer_append_name = ""
 
         # Find dataset path:
-        for line in open("dataset/paths", 'r'):
+        for line in open("datasets/paths", 'r'):
             if 'Dataset:' in line:
                 self.dataset_path = line.split(" ")[1].replace('\r', '').replace('\n', '')
 
