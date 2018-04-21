@@ -7,7 +7,7 @@
 #SBATCH --workdir=./log/
 #SBATCH --qos=cbmm
 
-cd /om/user/xboix/src/robustness/
+cd /om/user/xboix/src/minimal-cifar/
 singularity exec -B /om:/om --nv /om/user/xboix/singularity/localtensorflow.img \
 python /om/user/xboix/src/minimal-cifar/main.py ${SLURM_ARRAY_TASK_ID}
 
