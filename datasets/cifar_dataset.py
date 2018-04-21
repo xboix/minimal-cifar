@@ -112,8 +112,9 @@ class Cifar10(dataset.Dataset):
                                                        lower=0.2, upper=1.8)
         else:
 
-            distorted_image = tf.image.resize_image_with_crop_or_pad(image,
-                                                    self.opt.hyper.crop_size, self.opt.hyper.crop_size)
+            csize = tf.random_uniform(1, minval=self.opt.hyper.crop_size,maxval=self.opt.hyper.image_size)
+            distorted_image = tf.random_crop(image, [csize, csize, 3])
+
 
         if standarization:
             # Subtract off the mean and divide by the variance of the pixels.

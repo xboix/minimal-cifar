@@ -31,7 +31,7 @@ class Dataset(object):
         self.transfer_append_name = ""
 
         # Find dataset path:
-        for line in open("datasets/paths", 'r'):
+        for line in open("data/paths", 'r'):
             if 'Dataset:' in line:
                 self.dataset_path = line.split(" ")[1].replace('\r', '').replace('\n', '')
 
@@ -63,7 +63,7 @@ class Dataset(object):
 class DNN(object):
 
     def __init__(self):
-        self.name = "MLP"
+        self.name = "Alexnet"
         self.pretrained = False
         self.version = 1
         self.layers = 4
@@ -95,7 +95,11 @@ class Experiments(object):
 
     def __init__(self, id, name):
         self.name = "base"
-        self.log_dir_base = "./log/"
+        self.log_dir_base = "/om/user/xboix/share/minimal-images/models/"
+            #"/om/user/xboix/src/robustness/robustness/log/"
+            #"/Users/xboix/src/martin/robustness/robustness/log/"
+            #"/om/user/xboix/src/robustness/robustness/log/"
+
 
         # Recordings
         self.max_to_keep_checkpoints = 5
@@ -142,11 +146,11 @@ class Experiments(object):
 opt = []
 plot_freezing = []
 
-neuron_multiplier = [0.25, 1, 4, 16, 64]
-training_data = [1, 0.5, 0.25, 0.125, 0.0625]
-name = ["MLP1", "MLP3"]
-num_layers = [1, 3]
-max_epochs = [10, 20]
+neuron_multiplier = [0.25, 0.5, 1, 2, 4]
+training_data = [1]
+name = ["Alexnet"]
+num_layers = [5]
+max_epochs = [100]
 
 idx = 0
 # Create base for TF records:
@@ -154,66 +158,41 @@ opt += [Experiments(idx, "data")]
 opt[-1].hyper.max_num_epochs = 0
 idx += 1
 
-# Create base for TF records:
-opt += [Experiments(idx, "data_random")]
-opt[-1].hyper.max_num_epochs = 0
-opt[-1].dataset.random_labels = True
-idx += 1
-
-# Create base for TF records:
-opt += [Experiments(idx, "data_scrambled")]
-opt[-1].hyper.max_num_epochs = 0
-opt[-1].dataset.scramble_data = True
-idx += 1
-
 
 for name_NN, num_layers_NN, max_epochs_NN in zip(name, num_layers, max_epochs):
-    for idx_data in range(7):
-        for regularizers in range(5):
-
-            # Change number neurons for each layer
-            for layer in range(num_layers_NN):
-                for multiplier in neuron_multiplier:
-                    opt += [Experiments(idx, name_NN + "_layer_" + str(layer) +
-                                        "_" + str(multiplier) + "_" + str(regularizers) + "_" + str(idx_data))]
-                    opt[-1].dataset.reuse_tfrecords(opt[idx_data])
-                    opt[-1].hyper.max_num_epochs = max_epochs_NN
-                    opt[-1].dnn.name = name_NN
-                    opt[-1].dnn.set_num_layers(num_layers_NN)
-                    opt[-1].dnn.neuron_multiplier[layer] = multiplier
-                    if regularizers == 1:
-                        opt[-1].dnn.augmentation = True
-                        opt[-1].hyper.max_num_epochs = int(max_epochs_NN * 1.5)
-                    elif regularizers == 2:
-                        opt[-1].dnn.drop_train = 0.5
-                    elif regularizers == 3:
-                        opt[-1].dnn.weight_decay = 0.001
-                    elif regularizers == 4:
-                        opt[-1].dnn.augmentation = True
-                        opt[-1].hyper.max_num_epochs = int(max_epochs_NN * 1.5)
-                        opt[-1].dnn.drop_train = 0.5
-                        opt[-1].dnn.weight_decay = 0.001
-                    idx += 1
+        for regularizers in range(1): #5):
 
             # Change number neurons for each layer
             for multiplier in neuron_multiplier:
                 opt += [Experiments(idx, name_NN + "_layers_all_" +
-                                    str(multiplier) + "_" + str(regularizers) + "_" + str(idx_data))]
-                opt[-1].dataset.reuse_tfrecords(opt[idx_data])
+                                str(multiplier) + "_" + str(regularizers))]
+
                 opt[-1].hyper.max_num_epochs = max_epochs_NN
                 opt[-1].dnn.name = name_NN
                 opt[-1].dnn.set_num_layers(num_layers_NN)
                 opt[-1].dnn.neuron_multiplier.fill(multiplier)
+
+                opt[-1].dataset.reuse_tfrecords(opt[0])
+                opt[-1].hyper.max_num_epochs = int(max_epochs_NN)
+                opt[-1].hyper.num_epochs_per_decay = \
+                    int(opt[-1].hyper.num_epochs_per_decay)
+
+
+
+                # SKIP#SKIP#SKIP#SKIP#SKIP#SKIP
+                if regularizers > 0:
+                    opt[-1].skip = True
+
                 if regularizers == 1:
-                    opt[-1].dnn.augmentation = True
-                    opt[-1].hyper.max_num_epochs = int(max_epochs_NN*1.5)
+                    opt[-1].hyper.augmentation = True
+                    opt[-1].hyper.max_num_epochs *= int(2)
                 elif regularizers == 2:
-                    opt[-1].dnn.drop_train = 0.5
+                    opt[-1].hyper.drop_train = 0.5
                 elif regularizers == 3:
-                    opt[-1].dnn.weight_decay = 0.001
+                    opt[-1].hyper.weight_decay = 0.001
                 elif regularizers == 4:
-                    opt[-1].dnn.augmentation = True
-                    opt[-1].hyper.max_num_epochs = int(max_epochs_NN * 1.5)
-                    opt[-1].dnn.drop_train = 0.5
-                    opt[-1].dnn.weight_decay = 0.001
+                    opt[-1].hyper.augmentation = True
+                    opt[-1].hyper.max_num_epochs *= int(2)
+                    opt[-1].hyper.drop_train = 0.5
+                    opt[-1].hyper.weight_decay = 0.001
                 idx += 1
