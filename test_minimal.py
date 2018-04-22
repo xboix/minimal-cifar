@@ -53,12 +53,11 @@ test_iterator_full = test_dataset_full.make_initializable_iterator()
 # Get data from dataset dataset
 images_in, y_ = iterator.get_next()
 
-opt.hyper.crop_size = len(experiments.crop_sizes)
 
 def get_candidates(im):
     candidate_transformations = \
         [lambda: tf.random_crop(im, [experiments.crop_sizes[i], experiments.crop_sizes[i], 3])
-         for i in range(opt.hyper.crop_size+1)]
+         for i in range(len(experiments.crop_sizes))]
     return candidate_transformations
 
 
@@ -181,7 +180,7 @@ with tf.Session() as sess:
     if flag_testable:
 
         test_handle_full = sess.run(test_iterator_full.string_handle())
-        for cc in range(len(experiments.crop_size)+1):
+        for cc in range(len(experiments.crop_sizes)):
             # Run one pass over a batch of the test dataset.
             sess.run(test_iterator_full.initializer)
             acc_tmp = 0.0
