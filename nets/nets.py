@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 
-from alexnet import Alexnet as net_Alexnet
+from nets.alexnet import Alexnet as net_Alexnet
 from util import summary as summ
 
 

@@ -63,18 +63,19 @@ test_iterator_full = test_dataset_full.make_initializable_iterator()
 ################################################################################################
 
 # Get data from dataset dataset
-image, y_ = iterator.get_next()
+images_in, y_ = iterator.get_next()
 
 
-def get_candidates(im, opt):
+def get_candidates(im):
     candidate_transformations = \
-        [lambda: tf.random_crop(im, [experiments.crop_sizes[i], experiments.crop_sizes[i], 3]) for i in range(5)]
+        [lambda: tf.random_crop(im, [experiments.crop_sizes[i], experiments.crop_sizes[i], 3])
+         for i in range(opt.hyper.crop_size+1)]
     return candidate_transformations
 
 
-def aux_transf(im, rr, opt):
+def aux_transf(im, rr):
 
-    candidate_transformations = get_candidates(im, opt)
+    candidate_transformations = get_candidates(im)
 
     pred_fn_pairs = []
     pred_fn_pairs.append((tf.equal(rr, tf.constant(0)), candidate_transformations[0]))
@@ -90,19 +91,22 @@ def aux_transf(im, rr, opt):
 
 
 rand = tf.random_uniform([opt.hyper.batch_size],
-                         minval=0, maxval=opt.hyper.crop_size, dtype=tf.int32)
+                         minval=0, maxval=opt.hyper.crop_size + 1, dtype=tf.int32)
 
-ims = tf.unstack(image, num=opt.hyper.batch_size, axis=0)
+ims = tf.unstack(images_in, num=opt.hyper.batch_size, axis=0)
 rr = tf.unstack(rand, axis=0)
 
 process_ims = []
 for im, r in zip(ims, rr): #Get each individual image
-    im = tf.case(pred_fn_pairs=aux_transf(im, r, opt), default=lambda: im)
-    im = tf.image.per_image_standardization(im)
-    im = tf.image.resize_images(im, [opt.hyper.image_size, opt.hyper.image_size])
+    imc = tf.case(pred_fn_pairs=aux_transf(im, r), default=lambda: 0*im)
+    imc = tf.image.resize_images(imc, [opt.hyper.image_size, opt.hyper.image_size])
+    imc = tf.image.per_image_standardization(imc)
+    imc.set_shape([opt.hyper.image_size, opt.hyper.image_size, 3])
+    process_ims.append(imc)
 
-image = tf.stack(ims)
+image = tf.stack(process_ims)
 
+image.set_shape([opt.hyper.batch_size, opt.hyper.image_size, opt.hyper.image_size, 3])
 
 if opt.extense_summary:
     tf.summary.image('input', image)
@@ -110,7 +114,7 @@ if opt.extense_summary:
 # Call DNN
 dropout_rate = tf.placeholder(tf.float32)
 to_call = getattr(nets, opt.dnn.name)
-y, parameters = to_call(image, dropout_rate, opt, dataset.list_labels)
+y, parameters, _ = to_call(image, dropout_rate, opt, dataset.list_labels)
 
 # Loss function
 with tf.name_scope('loss'):
