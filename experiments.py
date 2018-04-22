@@ -96,8 +96,8 @@ class Experiments(object):
     def __init__(self, id, name):
         self.name = "base"
         self.log_dir_base = "/om/user/xboix/share/minimal-images/models/"
+            #"/Users/xboix/src/minimal-cifar/log/"
             #"/om/user/xboix/src/robustness/robustness/log/"
-            #"/Users/xboix/src/martin/robustness/robustness/log/"
             #"/om/user/xboix/src/robustness/robustness/log/"
 
 
@@ -147,6 +147,7 @@ opt = []
 plot_freezing = []
 
 neuron_multiplier = [0.25, 0.5, 1, 2, 4]
+crop_sizes = [28, 24, 18, 12, 6]
 training_data = [1]
 name = ["Alexnet"]
 num_layers = [5]
@@ -160,14 +161,16 @@ idx += 1
 
 
 for name_NN, num_layers_NN, max_epochs_NN in zip(name, num_layers, max_epochs):
+    for crop_size in range(len(crop_sizes)):
         for regularizers in range(1): #5):
 
             # Change number neurons for each layer
             for multiplier in neuron_multiplier:
                 opt += [Experiments(idx, name_NN + "_layers_all_" +
-                                str(multiplier) + "_" + str(regularizers))]
+                                str(multiplier) + "_" + str(crop_size))]
 
                 opt[-1].hyper.max_num_epochs = max_epochs_NN
+                opt[-1].hyper.crop_size = crop_size
                 opt[-1].dnn.name = name_NN
                 opt[-1].dnn.set_num_layers(num_layers_NN)
                 opt[-1].dnn.neuron_multiplier.fill(multiplier)

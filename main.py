@@ -36,13 +36,13 @@ print(opt.name)
 dataset = cifar_dataset.Cifar10(opt)
 
 # Repeatable datasets for training
-train_dataset = dataset.create_dataset(augmentation=opt.hyper.augmentation, standarization=True, set_name='train', repeat=True)
-val_dataset = dataset.create_dataset(augmentation=False, standarization=True, set_name='val', repeat=True)
+train_dataset = dataset.create_dataset(augmentation=opt.hyper.augmentation, standarization=False, set_name='train', repeat=True)
+val_dataset = dataset.create_dataset(augmentation=False, standarization=False, set_name='val', repeat=True)
 
 # No repeatable dataset for testing
-train_dataset_full = dataset.create_dataset(augmentation=False, standarization=True, set_name='train', repeat=False)
-val_dataset_full = dataset.create_dataset(augmentation=False, standarization=True, set_name='val', repeat=False)
-test_dataset_full = dataset.create_dataset(augmentation=False, standarization=True, set_name='test', repeat=False)
+train_dataset_full = dataset.create_dataset(augmentation=False, standarization=False, set_name='train', repeat=False)
+val_dataset_full = dataset.create_dataset(augmentation=False, standarization=False, set_name='val', repeat=False)
+test_dataset_full = dataset.create_dataset(augmentation=False, standarization=False, set_name='test', repeat=False)
 
 # Hadles to switch datasets
 handle = tf.placeholder(tf.string, shape=[])
@@ -64,7 +64,46 @@ test_iterator_full = test_dataset_full.make_initializable_iterator()
 
 # Get data from dataset dataset
 image, y_ = iterator.get_next()
-image = tf.image.resize_images(image, [opt.hyper.image_size, opt.hyper.image_size])
+
+
+def get_candidates(im, opt):
+    candidate_transformations = \
+        [lambda: tf.random_crop(im, [experiments.crop_sizes[i], experiments.crop_sizes[i], 3]) for i in range(5)]
+    return candidate_transformations
+
+
+def aux_transf(im, rr, opt):
+
+    candidate_transformations = get_candidates(im, opt)
+
+    pred_fn_pairs = []
+    pred_fn_pairs.append((tf.equal(rr, tf.constant(0)), candidate_transformations[0]))
+
+    cc = 1
+    for t in range(len(candidate_transformations) - 1):
+        pred_fn_pairs.append((
+            tf.equal(rr, tf.constant(cc)),
+            candidate_transformations[t]))
+        cc += 1
+
+    return pred_fn_pairs
+
+
+rand = tf.random_uniform([opt.hyper.batch_size],
+                         minval=0, maxval=opt.hyper.crop_size, dtype=tf.int32)
+
+ims = tf.unstack(image, num=opt.hyper.batch_size, axis=0)
+rr = tf.unstack(rand, axis=0)
+
+process_ims = []
+for im, r in zip(ims, rr): #Get each individual image
+    im = tf.case(pred_fn_pairs=aux_transf(im, r, opt), default=lambda: im)
+    im = tf.image.per_image_standardization(im)
+    im = tf.image.resize_images(im, [opt.hyper.image_size, opt.hyper.image_size])
+
+image = tf.stack(ims)
+
+
 if opt.extense_summary:
     tf.summary.image('input', image)
 
