@@ -67,9 +67,13 @@ images_in, y_ = iterator.get_next()
 
 
 def get_candidates(im):
-    candidate_transformations = \
-        [lambda: tf.random_crop(im, [experiments.crop_sizes[i], experiments.crop_sizes[i], 3])
-         for i in range(opt.hyper.crop_size+1)]
+    candidate_transformations = [
+        lambda: tf.random_crop(im, [experiments.crop_sizes[0], experiments.crop_sizes[0], 3]),
+        lambda: tf.random_crop(im, [experiments.crop_sizes[1], experiments.crop_sizes[1], 3]),
+        lambda: tf.random_crop(im, [experiments.crop_sizes[2], experiments.crop_sizes[2], 3]),
+        lambda: tf.random_crop(im, [experiments.crop_sizes[3], experiments.crop_sizes[3], 3]),
+        lambda: tf.random_crop(im, [experiments.crop_sizes[4], experiments.crop_sizes[4], 3])
+    ]
     return candidate_transformations
 
 
