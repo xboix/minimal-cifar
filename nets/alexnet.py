@@ -1,6 +1,5 @@
 import tensorflow as tf
-from util import summary as summ
-
+from utils import summary as summ
 from numpy import *
 
 
@@ -8,10 +7,10 @@ import numpy as np
 
 import sys
 
-num_neurons = [96, 256,  384, 192]
+num_neurons = [96, 256, 384, 192]
+
 
 def conv(input, kernel, biases, k_h, k_w, c_o, s_h, s_w, padding="VALID", group=1):
-
     c_i = input.get_shape()[-1]
     assert c_i % group == 0
     assert c_o % group == 0
@@ -28,7 +27,6 @@ def conv(input, kernel, biases, k_h, k_w, c_o, s_h, s_w, padding="VALID", group=
 
 
 def Alexnet(x, opt, labels_id, dropout_rate):
-
     reuse = False
 
     global num_neurons
@@ -38,11 +36,12 @@ def Alexnet(x, opt, labels_id, dropout_rate):
     # conv1
     with tf.variable_scope('conv1', reuse=reuse) as scope:
         kernel = tf.get_variable(initializer=tf.truncated_normal(
-            [5, 5, 3, int(num_neurons[0]*opt.dnn.neuron_multiplier[0])],
-            stddev=5e-2, dtype=tf.float32), name='weights')
+            [5, 5, 3, int(num_neurons[0] * opt.dnn.neuron_multiplier[0])],
+            stddev=5e-2 / np.maximum(1, opt.dnn.neuron_multiplier[0]), dtype=tf.float32), name='weights')
         conv = tf.nn.conv2d(x, kernel, [1, 1, 1, 1], padding='SAME')
         biases = tf.get_variable(initializer=
-                                 tf.constant(0.0, shape=[int(num_neurons[0]*opt.dnn.neuron_multiplier[0])]), name='biases')
+                                 tf.constant(0.0, shape=[int(num_neurons[0] * opt.dnn.neuron_multiplier[0])]),
+                                 name='biases')
         pre_activation = tf.nn.bias_add(conv, biases)
         conv1 = tf.nn.relu(pre_activation, name=scope.name)
 
@@ -62,18 +61,20 @@ def Alexnet(x, opt, labels_id, dropout_rate):
         beta = 0.75;
         bias = 1.0
         lrn1 = tf.nn.local_response_normalization(pool1,
-                                              depth_radius=radius,
-                                              alpha=alpha,
-                                              beta=beta,
-                                              bias=bias)
+                                                  depth_radius=radius,
+                                                  alpha=alpha,
+                                                  beta=beta,
+                                                  bias=bias)
 
     # conv2
     with tf.variable_scope('conv2', reuse=reuse) as scope:
         kernel = tf.get_variable(initializer=tf.truncated_normal(
-            [5, 5, int(num_neurons[0]*opt.dnn.neuron_multiplier[0]),int(num_neurons[1]*opt.dnn.neuron_multiplier[1])],
-            stddev=5e-2, dtype=tf.float32), name='weights')
+            [5, 5, int(num_neurons[0] * opt.dnn.neuron_multiplier[0]),
+             int(num_neurons[1] * opt.dnn.neuron_multiplier[1])],
+            stddev=5e-2 / np.maximum(1, opt.dnn.neuron_multiplier[1]), dtype=tf.float32), name='weights')
         conv = tf.nn.conv2d(lrn1, kernel, [1, 1, 1, 1], padding='SAME')
-        biases = tf.get_variable(initializer=tf.constant(0.1, shape=[int(num_neurons[1]*opt.dnn.neuron_multiplier[1])]), name='biases')
+        biases = tf.get_variable(
+            initializer=tf.constant(0.1, shape=[int(num_neurons[1] * opt.dnn.neuron_multiplier[1])]), name='biases')
 
         pre_activation = tf.nn.bias_add(conv, biases)
         conv2 = tf.nn.relu(pre_activation, name=scope.name)
@@ -106,9 +107,11 @@ def Alexnet(x, opt, labels_id, dropout_rate):
         dim = int(prod(lrn2.get_shape()[1:]))
         pool_vec = tf.reshape(lrn2, [opt.hyper.batch_size, -1])
 
-        nneurons = int(num_neurons[2]*opt.dnn.neuron_multiplier[2])
+        nneurons = int(num_neurons[2] * opt.dnn.neuron_multiplier[2])
         weights = tf.get_variable(
-            initializer=tf.truncated_normal([dim, nneurons], stddev=0.04, dtype=tf.float32), name='weights')
+            initializer=tf.truncated_normal([dim, nneurons],
+                                            stddev=0.04 / np.maximum(1, opt.dnn.neuron_multiplier[2]),
+                                            dtype=tf.float32), name='weights')
         biases = tf.get_variable(initializer=tf.constant(0.1, shape=[nneurons]), name='biases')
 
         local3t = tf.nn.relu(tf.matmul(pool_vec, weights) + biases, name=scope.name)
@@ -124,15 +127,16 @@ def Alexnet(x, opt, labels_id, dropout_rate):
     # local4
     with tf.variable_scope('local4', reuse=reuse) as scope:
         weights = tf.get_variable(
-            initializer=tf.truncated_normal([nneurons, int(num_neurons[3]*opt.dnn.neuron_multiplier[3])],
-                                            stddev=0.04, dtype=tf.float32), name='weights')
+            initializer=tf.truncated_normal([nneurons, int(num_neurons[3] * opt.dnn.neuron_multiplier[3])],
+                                            stddev=0.04 / np.maximum(1, opt.dnn.neuron_multiplier[3]),
+                                            dtype=tf.float32), name='weights')
 
-        biases = tf.get_variable(initializer=tf.constant(0.1,shape=[int(num_neurons[3]*opt.dnn.neuron_multiplier[3])]), name='biases')
+        biases = tf.get_variable(
+            initializer=tf.constant(0.1, shape=[int(num_neurons[3] * opt.dnn.neuron_multiplier[3])]), name='biases')
         local4t = tf.nn.relu(tf.matmul(local3, weights) + biases, name=scope.name)
         local4 = tf.nn.dropout(local4t, dropout_rate)
 
         print(np.prod(local4.shape[1:]))
-
 
         activations += [local4]
         parameters += [weights]
@@ -145,9 +149,9 @@ def Alexnet(x, opt, labels_id, dropout_rate):
     # and performs the softmax internally for efficiency.
     with tf.variable_scope('softmax_linear', reuse=reuse) as scope:
         weights = tf.get_variable(
-            initializer=tf.truncated_normal([int(num_neurons[3]*opt.dnn.neuron_multiplier[3]), len(labels_id)],
-                                            stddev=1 / (float(num_neurons[3]*opt.dnn.neuron_multiplier[3])), dtype=tf.float32),
-                             name='weights')
+            initializer=tf.truncated_normal([int(num_neurons[3] * opt.dnn.neuron_multiplier[3]), len(labels_id)],
+                                            stddev=1 / (float(num_neurons[3])), dtype=tf.float32),
+            name='weights')
         biases = tf.get_variable(initializer=tf.constant(0.0, shape=[len(labels_id)]), name='biases')
         fc8 = tf.add(tf.matmul(local4, weights), biases, name=scope.name)
 
@@ -156,4 +160,3 @@ def Alexnet(x, opt, labels_id, dropout_rate):
         summ.activation_summaries(fc8, opt)
 
     return fc8, parameters, activations
-
