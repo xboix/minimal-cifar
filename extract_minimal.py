@@ -11,6 +11,8 @@ from nets import nets
 from util import summary
 import pickle
 
+TOTAL = 1000
+
 ################################################################################################
 # Read experiment to run
 ################################################################################################
@@ -55,7 +57,7 @@ test_iterator_full = test_dataset_full.make_initializable_iterator()
 ################################################################################################
 
 # Get data from dataset dataset
-images_in, y_ = iterator.get_next()\
+images_in, y_ = iterator.get_next()
 
 
 patches = tf.extract_image_patches(
@@ -137,8 +139,7 @@ with tf.Session() as sess:
         test_handle_full = sess.run(test_iterator_full.string_handle())
         # Run one pass over a batch of the test dataset.
         sess.run(test_iterator_full.initializer)
-        acc_tmp = 0.0
-        for num_iter in range(int(dataset.num_images_test / opt.hyper.batch_size)):
+        for num_iter in range(TOTAL):
             top_map, gt, pred_map = sess.run([y, y_, correct_prediction], feed_dict={handle: test_handle_full,
                                                       dropout_rate: opt.hyper.drop_test})
 
@@ -147,11 +148,12 @@ with tf.Session() as sess:
 
             with open(opt.log_dir_base + opt.name + '/maps/top/' + str(experiments.crop_sizes[crop_size])
                       + '/' + str(num_iter) + '.pkl', 'wb') as f:
-                pickle.dump(top_map, f)
+                pickle.dump(pred_map, f)
 
             with open(opt.log_dir_base + opt.name + '/maps/confidence/' + str(experiments.crop_sizes[crop_size])
                      + '/' + str(num_iter) + '.pkl', 'wb') as f:
-                pickle.dump(pred_map, f)
+                pickle.dump(top_map, f)
+
 
             print(num_iter)
             sys.stdout.flush()
