@@ -9,7 +9,7 @@ import experiments
 from datasets import cifar_dataset
 from nets import nets
 from util import summary
-
+import pickle
 
 ################################################################################################
 # Read experiment to run
@@ -25,11 +25,15 @@ if opt.skip:
     quit()
 
 print(opt.name)
+
+crop_size = int(sys.argv[1:][1])
 ################################################################################################
 
 ################################################################################################
 # Define training and validation datasets through Dataset API
 ################################################################################################
+
+opt.hyper.batch_size = 1
 
 # Initialize dataset and creates TF records if they do not exist
 dataset = cifar_dataset.Cifar10(opt)
@@ -51,52 +55,31 @@ test_iterator_full = test_dataset_full.make_initializable_iterator()
 ################################################################################################
 
 # Get data from dataset dataset
-images_in, y_ = iterator.get_next()
+images_in, y_ = iterator.get_next()\
 
 
-def get_candidates(im):
-    candidate_transformations = [
-        lambda: tf.random_crop(im, [experiments.crop_sizes[0], experiments.crop_sizes[0], 3]),
-        lambda: tf.random_crop(im, [experiments.crop_sizes[1], experiments.crop_sizes[1], 3]),
-        lambda: tf.random_crop(im, [experiments.crop_sizes[2], experiments.crop_sizes[2], 3]),
-        lambda: tf.random_crop(im, [experiments.crop_sizes[3], experiments.crop_sizes[3], 3]),
-        lambda: tf.random_crop(im, [experiments.crop_sizes[4], experiments.crop_sizes[4], 3])
-    ]
-    return candidate_transformations
+patches = tf.extract_image_patches(
+    images=images_in,
+    ksizes=[1, experiments.crop_sizes[crop_size], experiments.crop_sizes[crop_size], 1],
+    strides=[1, 1, 1, 1],
+    rates=[1, 1, 1, 1],
+    padding='VALID')
 
+map_size = (opt.hyper.image_size - experiments.crop_sizes[crop_size] + 1)
 
-def aux_transf(im, rr):
+patches = tf.reshape(patches, [-1, experiments.crop_sizes[crop_size], experiments.crop_sizes[crop_size], 3])
 
-    candidate_transformations = get_candidates(im)
-
-    pred_fn_pairs = []
-    pred_fn_pairs.append((tf.equal(rr, tf.constant(0)), candidate_transformations[0]))
-
-    cc = 1
-    for t in range(len(candidate_transformations) - 1):
-        pred_fn_pairs.append((
-            tf.equal(rr, tf.constant(cc)),
-            candidate_transformations[t]))
-        cc += 1
-
-    return pred_fn_pairs
-
-
-crop_size = tf.placeholder(tf.int32)
-
-ims = tf.unstack(images_in, num=opt.hyper.batch_size, axis=0)
+ims = tf.unstack(patches, num=map_size**2, axis=0)
 
 process_ims = []
 for im in ims: #Get each individual image
-    imc = tf.case(pred_fn_pairs=aux_transf(im, crop_size), default=lambda: 0*im)
-    imc = tf.image.resize_images(imc, [opt.hyper.image_size, opt.hyper.image_size])
+    imc = tf.image.resize_images(im, [opt.hyper.image_size, opt.hyper.image_size])
     imc = tf.image.per_image_standardization(imc)
     imc.set_shape([opt.hyper.image_size, opt.hyper.image_size, 3])
     process_ims.append(imc)
 
 image = tf.stack(process_ims)
 
-image.set_shape([opt.hyper.batch_size, opt.hyper.image_size, opt.hyper.image_size, 3])
 
 if opt.extense_summary:
     tf.summary.image('input', image)
@@ -106,40 +89,6 @@ dropout_rate = tf.placeholder(tf.float32)
 to_call = getattr(nets, opt.dnn.name)
 y, parameters, _ = to_call(image, dropout_rate, opt, dataset.list_labels)
 
-# Loss function
-with tf.name_scope('loss'):
-    weights_norm = tf.reduce_sum(
-        input_tensor=opt.hyper.weight_decay * tf.stack(
-            [tf.nn.l2_loss(i) for i in parameters]
-        ),
-        name='weights_norm')
-    tf.summary.scalar('weight_decay', weights_norm)
-
-    cross_entropy = tf.reduce_mean(
-        tf.nn.sparse_softmax_cross_entropy_with_logits(labels=y_, logits=y))
-    tf.summary.scalar('cross_entropy', cross_entropy)
-
-    total_loss = weights_norm + cross_entropy
-    tf.summary.scalar('total_loss', total_loss)
-
-global_step = tf.Variable(0, name='global_step', trainable=False)
-################################################################################################
-
-
-################################################################################################
-# Set up Training
-################################################################################################
-
-# Learning rate
-num_batches_per_epoch = dataset.num_images_epoch / opt.hyper.batch_size
-decay_steps = int(opt.hyper.num_epochs_per_decay)
-lr = tf.train.exponential_decay(opt.hyper.learning_rate,
-                                global_step,
-                                decay_steps,
-                                opt.hyper.learning_rate_factor_per_decay,
-                                staircase=True)
-tf.summary.scalar('learning_rate', lr)
-tf.summary.scalar('weight_decay', opt.hyper.weight_decay)
 
 # Accuracy
 with tf.name_scope('accuracy'):
@@ -149,6 +98,14 @@ with tf.name_scope('accuracy'):
     tf.summary.scalar('accuracy', accuracy)
 ################################################################################################
 
+if not os.path.exists(opt.log_dir_base + opt.name + '/maps'):
+    os.makedirs(opt.log_dir_base + opt.name + '/maps')
+    os.makedirs(opt.log_dir_base + opt.name + '/maps/top/')
+    os.makedirs(opt.log_dir_base + opt.name + '/maps/confidence/')
+
+if not os.path.exists(opt.log_dir_base + opt.name + '/maps/top/' + str(experiments.crop_sizes[crop_size])):
+    os.makedirs(opt.log_dir_base + opt.name + '/maps/top/' + str(experiments.crop_sizes[crop_size]))
+    os.makedirs(opt.log_dir_base + opt.name + '/maps/confidence/' + str(experiments.crop_sizes[crop_size]))
 
 with tf.Session() as sess:
 
@@ -164,12 +121,6 @@ with tf.Session() as sess:
     # Set up directories and checkpoints
     if not os.path.isfile(opt.log_dir_base + opt.name + '/models/checkpoint'):
         sess.run(tf.global_variables_initializer())
-    elif opt.restart:
-        print("RESTART")
-        shutil.rmtree(opt.log_dir_base + opt.name + '/models/')
-        shutil.rmtree(opt.log_dir_base + opt.name + '/train/')
-        shutil.rmtree(opt.log_dir_base + opt.name + '/val/')
-        sess.run(tf.global_variables_initializer())
     else:
         print("RESTORE")
         saver.restore(sess, tf.train.latest_checkpoint(opt.log_dir_base + opt.name + '/models/'))
@@ -184,18 +135,25 @@ with tf.Session() as sess:
     if flag_testable:
 
         test_handle_full = sess.run(test_iterator_full.string_handle())
-        for cc in range(len(experiments.crop_sizes)):
-            # Run one pass over a batch of the test dataset.
-            sess.run(test_iterator_full.initializer)
-            acc_tmp = 0.0
-            for num_iter in range(int(dataset.num_images_test / opt.hyper.batch_size)):
-                acc_val = sess.run([accuracy], feed_dict={handle: test_handle_full,
-                                                          dropout_rate: opt.hyper.drop_test,
-                                                          crop_size: cc})
-                acc_tmp += acc_val[0]
+        # Run one pass over a batch of the test dataset.
+        sess.run(test_iterator_full.initializer)
+        acc_tmp = 0.0
+        for num_iter in range(int(dataset.num_images_test / opt.hyper.batch_size)):
+            top_map, gt, pred_map = sess.run([y, y_, correct_prediction], feed_dict={handle: test_handle_full,
+                                                      dropout_rate: opt.hyper.drop_test})
 
-            val_acc = acc_tmp / float(int(dataset.num_images_test / opt.hyper.batch_size))
-            print("Full test acc for crop_size=" + str(experiments.crop_sizes[cc]) + ": " + str(val_acc))
+            pred_map = np.reshape(pred_map,[map_size, map_size])
+            top_map = np.reshape(top_map[:, gt[0]], [map_size, map_size])
+
+            with open(opt.log_dir_base + opt.name + '/maps/top/' + str(experiments.crop_sizes[crop_size])
+                      + '/' + str(num_iter) + '.pkl', 'wb') as f:
+                pickle.dump(top_map, f)
+
+            with open(opt.log_dir_base + opt.name + '/maps/confidence/' + str(experiments.crop_sizes[crop_size])
+                     + '/' + str(num_iter) + '.pkl', 'wb') as f:
+                pickle.dump(pred_map, f)
+
+            print(num_iter)
             sys.stdout.flush()
 
         print(":)")

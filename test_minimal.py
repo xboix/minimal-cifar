@@ -106,41 +106,6 @@ dropout_rate = tf.placeholder(tf.float32)
 to_call = getattr(nets, opt.dnn.name)
 y, parameters, _ = to_call(image, dropout_rate, opt, dataset.list_labels)
 
-# Loss function
-with tf.name_scope('loss'):
-    weights_norm = tf.reduce_sum(
-        input_tensor=opt.hyper.weight_decay * tf.stack(
-            [tf.nn.l2_loss(i) for i in parameters]
-        ),
-        name='weights_norm')
-    tf.summary.scalar('weight_decay', weights_norm)
-
-    cross_entropy = tf.reduce_mean(
-        tf.nn.sparse_softmax_cross_entropy_with_logits(labels=y_, logits=y))
-    tf.summary.scalar('cross_entropy', cross_entropy)
-
-    total_loss = weights_norm + cross_entropy
-    tf.summary.scalar('total_loss', total_loss)
-
-global_step = tf.Variable(0, name='global_step', trainable=False)
-################################################################################################
-
-
-################################################################################################
-# Set up Training
-################################################################################################
-
-# Learning rate
-num_batches_per_epoch = dataset.num_images_epoch / opt.hyper.batch_size
-decay_steps = int(opt.hyper.num_epochs_per_decay)
-lr = tf.train.exponential_decay(opt.hyper.learning_rate,
-                                global_step,
-                                decay_steps,
-                                opt.hyper.learning_rate_factor_per_decay,
-                                staircase=True)
-tf.summary.scalar('learning_rate', lr)
-tf.summary.scalar('weight_decay', opt.hyper.weight_decay)
-
 # Accuracy
 with tf.name_scope('accuracy'):
     correct_prediction = tf.equal(tf.argmax(y, 1), y_)
@@ -163,12 +128,6 @@ with tf.Session() as sess:
 
     # Set up directories and checkpoints
     if not os.path.isfile(opt.log_dir_base + opt.name + '/models/checkpoint'):
-        sess.run(tf.global_variables_initializer())
-    elif opt.restart:
-        print("RESTART")
-        shutil.rmtree(opt.log_dir_base + opt.name + '/models/')
-        shutil.rmtree(opt.log_dir_base + opt.name + '/train/')
-        shutil.rmtree(opt.log_dir_base + opt.name + '/val/')
         sess.run(tf.global_variables_initializer())
     else:
         print("RESTORE")

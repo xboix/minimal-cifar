@@ -97,8 +97,6 @@ class Experiments(object):
         self.name = "base"
         self.log_dir_base = "/om/user/xboix/share/minimal-images/models/"
             #"/Users/xboix/src/minimal-cifar/log/"
-            #
-            #
             #"/om/user/xboix/src/robustness/robustness/log/"
             #"/om/user/xboix/src/robustness/robustness/log/"
 

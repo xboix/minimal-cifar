@@ -1,5 +1,5 @@
 import tensorflow as tf
-from utils import summary as summ
+from util import summary as summ
 from numpy import *
 
 
@@ -105,7 +105,7 @@ def Alexnet(x, opt, labels_id, dropout_rate):
         # Move everything into depth so we can perform a single matrix multiply.
 
         dim = int(prod(lrn2.get_shape()[1:]))
-        pool_vec = tf.reshape(lrn2, [opt.hyper.batch_size, -1])
+        pool_vec = tf.reshape(lrn2, [-1, dim])
 
         nneurons = int(num_neurons[2] * opt.dnn.neuron_multiplier[2])
         weights = tf.get_variable(
