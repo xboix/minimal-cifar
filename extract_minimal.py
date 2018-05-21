@@ -71,17 +71,16 @@ map_size = (opt.hyper.image_size - experiments.crop_sizes[crop_size] + 1)
 
 patches = tf.reshape(patches, [-1, experiments.crop_sizes[crop_size], experiments.crop_sizes[crop_size], 3])
 
-ims = tf.unstack(patches, num=map_size**2, axis=0)
+patches = tf.image.resize_nearest_neighbor(patches, [opt.hyper.image_size, opt.hyper.image_size])
 
+ims = tf.unstack(patches, num=map_size**2, axis=0)
 process_ims = []
 for im in ims: #Get each individual image
-    imc = tf.image.resize_images(im, [opt.hyper.image_size, opt.hyper.image_size])
-    imc = tf.image.per_image_standardization(imc)
+    imc = tf.image.per_image_standardization(im)
     imc.set_shape([opt.hyper.image_size, opt.hyper.image_size, 3])
     process_ims.append(imc)
 
 image = tf.stack(process_ims)
-
 
 if opt.extense_summary:
     tf.summary.image('input', image)
@@ -94,6 +93,7 @@ y, parameters, _ = to_call(image, dropout_rate, opt, dataset.list_labels)
 
 # Accuracy
 with tf.name_scope('accuracy'):
+    top_class = tf.argmax(y, 1)
     correct_prediction = tf.equal(tf.argmax(y, 1), y_)
     correct_prediction = tf.cast(correct_prediction, tf.float32)
     accuracy = tf.reduce_mean(correct_prediction)
@@ -139,27 +139,39 @@ with tf.Session() as sess:
         test_handle_full = sess.run(test_iterator_full.string_handle())
         # Run one pass over a batch of the test dataset.
         sess.run(test_iterator_full.initializer)
+
+        pred_map = np.zeros([TOTAL, map_size, map_size])
+        top_map = np.zeros([TOTAL, map_size, map_size])
+        pred_multi = np.zeros([TOTAL, map_size, map_size])
+
         for num_iter in range(TOTAL):
-            top_map, gt, pred_map = sess.run([y, y_, correct_prediction], feed_dict={handle: test_handle_full,
+
+            top_map, gt, pred_map, top_multi_map = sess.run([y, y_, correct_prediction, top_class], feed_dict={handle: test_handle_full,
                                                       dropout_rate: opt.hyper.drop_test})
 
-            pred_map = np.reshape(pred_map,[map_size, map_size])
-            top_map = np.reshape(top_map[:, gt[0]], [map_size, map_size])
+            a = np.reshape(pred_map,[map_size, map_size])
+            print(np.shape(a))
+            print(pred_map[num_iter, :, :].shape)
 
-            with open(opt.log_dir_base + opt.name + '/maps/top/' + str(experiments.crop_sizes[crop_size])
-                      + '/' + str(num_iter) + '.pkl', 'wb') as f:
-                pickle.dump(pred_map, f)
-
-            with open(opt.log_dir_base + opt.name + '/maps/confidence/' + str(experiments.crop_sizes[crop_size])
-                     + '/' + str(num_iter) + '.pkl', 'wb') as f:
-                pickle.dump(top_map, f)
-
-
+            pred_map[num_iter, :, :] = a
+            top_map[num_iter, :, :] = np.reshape(top_map[:, gt[0]], [map_size, map_size])
+            top_multi_map[num_iter, :, :] = np.reshape(top_multi_map, [map_size, map_size])
             print(num_iter)
             sys.stdout.flush()
 
-        print(":)")
+        with open(opt.log_dir_base + opt.name + '/maps/top/' + str(experiments.crop_sizes[crop_size])
+                  + '/maps.pkl', 'wb') as f:
+            pickle.dump(pred_map, f)
+
+        with open(opt.log_dir_base + opt.name + '/maps/confidence/' + str(experiments.crop_sizes[crop_size])
+                 + '/maps.pkl', 'wb') as f:
+            pickle.dump(top_map, f)
+
+        with open(opt.log_dir_base + opt.name + '/maps/top_multi/' + str(experiments.crop_sizes[crop_size])
+                 + '/maps.pkl', 'wb') as f:
+            pickle.dump(top_map, f)
 
     else:
         print("MODEL WAS NOT TRAINED")
 
+print(":)")

@@ -39,6 +39,7 @@ for num_iter in range(100):
 
     fig, ax = plt.subplots(figsize=(7, 5))
     plt.imshow(results)
+    plt.colorbar()
     plt.savefig(opt.log_dir_base + opt.name + '/maps/top/' + str(experiments.crop_sizes[crop_size])
               + '/' + str(num_iter) + '.pdf', format='pdf', dpi=1000)
 
@@ -50,7 +51,11 @@ for num_iter in range(100):
 
     fig, ax = plt.subplots(figsize=(7, 5))
     plt.imshow(results)
+    plt.colorbar()
     plt.savefig(opt.log_dir_base + opt.name + '/maps/confidence/' + str(experiments.crop_sizes[crop_size])
               + '/' + str(num_iter) + '.pdf', format='pdf', dpi=1000)
 
     plt.close('all')
+
+    print(num_iter)
+    sys.stdout.flush()

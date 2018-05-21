@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -n 2
-#SBATCH --array=25
+#SBATCH --array=1-25
 #SBATCH --job-name=minimal
 #SBATCH --mem=16GB
 #SBATCH --gres=gpu:tesla-k80:1

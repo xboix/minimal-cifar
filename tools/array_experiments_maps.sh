@@ -14,6 +14,6 @@ hostname
 
 cd /om/user/xboix/src/minimal-cifar/
 singularity exec -B /om:/om --nv /om/user/xboix/singularity/localtensorflow.img \
-python /om/user/xboix/src/minimal-cifar/extract_minimal.py ${SLURM_ARRAY_TASK_ID} 4
+python /om/user/xboix/src/minimal-cifar/extract_minimal.py ${SLURM_ARRAY_TASK_ID} 2
 
 
