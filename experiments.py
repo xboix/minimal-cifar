@@ -162,40 +162,63 @@ idx += 1
 
 for name_NN, num_layers_NN, max_epochs_NN in zip(name, num_layers, max_epochs):
     for crop_size in range(len(crop_sizes)):
-        for regularizers in range(1): #5):
+        opt += [Experiments(idx, name_NN + "_augmentation_" + str(crop_size))]
 
-            # Change number neurons for each layer
-            for multiplier in neuron_multiplier:
-                opt += [Experiments(idx, name_NN + "_layers_all_" +
-                                str(multiplier) + "_" + str(crop_size))]
+        opt[-1].hyper.max_num_epochs = max_epochs_NN
+        opt[-1].hyper.crop_size = crop_size
+        opt[-1].dnn.name = name_NN
+        opt[-1].dnn.set_num_layers(num_layers_NN)
+        opt[-1].dnn.neuron_multiplier.fill(3)
 
-                opt[-1].hyper.max_num_epochs = max_epochs_NN
-                opt[-1].hyper.crop_size = crop_size
-                opt[-1].dnn.name = name_NN
-                opt[-1].dnn.set_num_layers(num_layers_NN)
-                opt[-1].dnn.neuron_multiplier.fill(multiplier)
+        opt[-1].dataset.reuse_tfrecords(opt[0])
+        opt[-1].hyper.max_num_epochs = int(max_epochs_NN)
+        opt[-1].hyper.num_epochs_per_decay = \
+            int(opt[-1].hyper.num_epochs_per_decay)
 
-                opt[-1].dataset.reuse_tfrecords(opt[0])
-                opt[-1].hyper.max_num_epochs = int(max_epochs_NN)
-                opt[-1].hyper.num_epochs_per_decay = \
-                    int(opt[-1].hyper.num_epochs_per_decay)
+        idx += 1
 
+    for regularizers in range(5):
 
+        opt += [Experiments(idx, name_NN + "_regularizer_" + str(regularizers))]
 
-                # SKIP#SKIP#SKIP#SKIP#SKIP#SKIP
-                if regularizers > 0:
-                    opt[-1].skip = True
+        opt[-1].hyper.max_num_epochs = max_epochs_NN
+        opt[-1].hyper.crop_size = 0
+        opt[-1].dnn.name = name_NN
+        opt[-1].dnn.set_num_layers(num_layers_NN)
+        opt[-1].dnn.neuron_multiplier.fill(3)
 
-                if regularizers == 1:
-                    opt[-1].hyper.augmentation = True
-                    opt[-1].hyper.max_num_epochs *= int(2)
-                elif regularizers == 2:
-                    opt[-1].hyper.drop_train = 0.5
-                elif regularizers == 3:
-                    opt[-1].hyper.weight_decay = 0.001
-                elif regularizers == 4:
-                    opt[-1].hyper.augmentation = True
-                    opt[-1].hyper.max_num_epochs *= int(2)
-                    opt[-1].hyper.drop_train = 0.5
-                    opt[-1].hyper.weight_decay = 0.001
-                idx += 1
+        opt[-1].dataset.reuse_tfrecords(opt[0])
+        opt[-1].hyper.max_num_epochs = int(max_epochs_NN)
+        opt[-1].hyper.num_epochs_per_decay = \
+            int(opt[-1].hyper.num_epochs_per_decay)
+
+        if regularizers == 1:
+            opt[-1].hyper.augmentation = True
+            opt[-1].hyper.max_num_epochs *= int(2)
+        elif regularizers == 2:
+            opt[-1].hyper.drop_train = 0.5
+        elif regularizers == 3:
+            opt[-1].hyper.weight_decay = 0.001
+        elif regularizers == 4:
+            opt[-1].hyper.augmentation = True
+            opt[-1].hyper.max_num_epochs *= int(2)
+            opt[-1].hyper.drop_train = 0.5
+            opt[-1].hyper.weight_decay = 0.001
+        idx += 1
+
+    # Change number neurons for each layer
+    for multiplier in [3, 7, 13]:
+        opt += [Experiments(idx, name_NN + "_pooling_" + str(multiplier))]
+
+        opt[-1].hyper.max_num_epochs = max_epochs_NN
+        opt[-1].hyper.crop_size = 0
+        opt[-1].dnn.name = name_NN
+        opt[-1].dnn.set_num_layers(num_layers_NN)
+        opt[-1].dnn.neuron_multiplier.fill(multiplier)
+
+        opt[-1].dataset.reuse_tfrecords(opt[0])
+        opt[-1].hyper.max_num_epochs = int(max_epochs_NN)
+        opt[-1].hyper.num_epochs_per_decay = \
+            int(opt[-1].hyper.num_epochs_per_decay)
+
+        idx += 1

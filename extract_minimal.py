@@ -104,10 +104,14 @@ if not os.path.exists(opt.log_dir_base + opt.name + '/maps'):
     os.makedirs(opt.log_dir_base + opt.name + '/maps')
     os.makedirs(opt.log_dir_base + opt.name + '/maps/top/')
     os.makedirs(opt.log_dir_base + opt.name + '/maps/confidence/')
+    os.makedirs(opt.log_dir_base + opt.name + '/maps/top_multi/')
+
 
 if not os.path.exists(opt.log_dir_base + opt.name + '/maps/top/' + str(experiments.crop_sizes[crop_size])):
     os.makedirs(opt.log_dir_base + opt.name + '/maps/top/' + str(experiments.crop_sizes[crop_size]))
     os.makedirs(opt.log_dir_base + opt.name + '/maps/confidence/' + str(experiments.crop_sizes[crop_size]))
+    os.makedirs(opt.log_dir_base + opt.name + '/maps/top_multi/' + str(experiments.crop_sizes[crop_size]))
+
 
 with tf.Session() as sess:
 
@@ -140,36 +144,32 @@ with tf.Session() as sess:
         # Run one pass over a batch of the test dataset.
         sess.run(test_iterator_full.initializer)
 
-        pred_map = np.zeros([TOTAL, map_size, map_size])
-        top_map = np.zeros([TOTAL, map_size, map_size])
-        pred_multi = np.zeros([TOTAL, map_size, map_size])
+        pred_map_total = np.zeros([TOTAL, map_size, map_size])
+        top_map_total = np.zeros([TOTAL, map_size, map_size])
+        top_multi_total = np.zeros([TOTAL, map_size, map_size])
 
         for num_iter in range(TOTAL):
 
             top_map, gt, pred_map, top_multi_map = sess.run([y, y_, correct_prediction, top_class], feed_dict={handle: test_handle_full,
                                                       dropout_rate: opt.hyper.drop_test})
 
-            a = np.reshape(pred_map,[map_size, map_size])
-            print(np.shape(a))
-            print(pred_map[num_iter, :, :].shape)
-
-            pred_map[num_iter, :, :] = a
-            top_map[num_iter, :, :] = np.reshape(top_map[:, gt[0]], [map_size, map_size])
-            top_multi_map[num_iter, :, :] = np.reshape(top_multi_map, [map_size, map_size])
+            pred_map_total[num_iter, :, :] = np.reshape(pred_map,[map_size, map_size])
+            top_map_total[num_iter, :, :] = np.reshape(top_map[:, gt[0]], [map_size, map_size])
+            top_multi_total[num_iter, :, :] = np.reshape(top_multi_map, [map_size, map_size])
             print(num_iter)
             sys.stdout.flush()
 
         with open(opt.log_dir_base + opt.name + '/maps/top/' + str(experiments.crop_sizes[crop_size])
                   + '/maps.pkl', 'wb') as f:
-            pickle.dump(pred_map, f)
+            pickle.dump(pred_map_total, f)
 
         with open(opt.log_dir_base + opt.name + '/maps/confidence/' + str(experiments.crop_sizes[crop_size])
                  + '/maps.pkl', 'wb') as f:
-            pickle.dump(top_map, f)
+            pickle.dump(top_map_total, f)
 
         with open(opt.log_dir_base + opt.name + '/maps/top_multi/' + str(experiments.crop_sizes[crop_size])
                  + '/maps.pkl', 'wb') as f:
-            pickle.dump(top_map, f)
+            pickle.dump(top_multi_total, f)
 
     else:
         print("MODEL WAS NOT TRAINED")

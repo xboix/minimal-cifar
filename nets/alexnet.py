@@ -36,11 +36,11 @@ def Alexnet(x, opt, labels_id, dropout_rate):
     # conv1
     with tf.variable_scope('conv1', reuse=reuse) as scope:
         kernel = tf.get_variable(initializer=tf.truncated_normal(
-            [5, 5, 3, int(num_neurons[0] * opt.dnn.neuron_multiplier[0])],
-            stddev=5e-2 / np.maximum(1, opt.dnn.neuron_multiplier[0]), dtype=tf.float32), name='weights')
+            [5, 5, 3, int(num_neurons[0])],
+            stddev=5e-2 , dtype=tf.float32), name='weights')
         conv = tf.nn.conv2d(x, kernel, [1, 1, 1, 1], padding='SAME')
         biases = tf.get_variable(initializer=
-                                 tf.constant(0.0, shape=[int(num_neurons[0] * opt.dnn.neuron_multiplier[0])]),
+                                 tf.constant(0.0, shape=[int(num_neurons[0])]),
                                  name='biases')
         pre_activation = tf.nn.bias_add(conv, biases)
         conv1 = tf.nn.relu(pre_activation, name=scope.name)
@@ -52,7 +52,8 @@ def Alexnet(x, opt, labels_id, dropout_rate):
         activations += [conv1]
 
     # pool1
-    pool1 = tf.nn.max_pool(conv1, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1],
+    pool1 = tf.nn.max_pool(conv1, ksize=[1, opt.dnn.neuron_multiplier[0], opt.dnn.neuron_multiplier[0], 1],
+                           strides=[1, 2, 2, 1],
                            padding='SAME', name='pool1')
 
     with tf.name_scope('lrn1') as scope:
@@ -69,12 +70,12 @@ def Alexnet(x, opt, labels_id, dropout_rate):
     # conv2
     with tf.variable_scope('conv2', reuse=reuse) as scope:
         kernel = tf.get_variable(initializer=tf.truncated_normal(
-            [5, 5, int(num_neurons[0] * opt.dnn.neuron_multiplier[0]),
-             int(num_neurons[1] * opt.dnn.neuron_multiplier[1])],
-            stddev=5e-2 / np.maximum(1, opt.dnn.neuron_multiplier[1]), dtype=tf.float32), name='weights')
+            [5, 5, int(num_neurons[0]),
+             int(num_neurons[1])],
+            stddev=5e-2, dtype=tf.float32), name='weights')
         conv = tf.nn.conv2d(lrn1, kernel, [1, 1, 1, 1], padding='SAME')
         biases = tf.get_variable(
-            initializer=tf.constant(0.1, shape=[int(num_neurons[1] * opt.dnn.neuron_multiplier[1])]), name='biases')
+            initializer=tf.constant(0.1, shape=[int(num_neurons[1])]), name='biases')
 
         pre_activation = tf.nn.bias_add(conv, biases)
         conv2 = tf.nn.relu(pre_activation, name=scope.name)
@@ -86,7 +87,7 @@ def Alexnet(x, opt, labels_id, dropout_rate):
         activations += [conv2]
 
     # pool2
-    pool2 = tf.nn.max_pool(conv2, ksize=[1, 3, 3, 1],
+    pool2 = tf.nn.max_pool(conv2, ksize=[1, opt.dnn.neuron_multiplier[1], opt.dnn.neuron_multiplier[1], 1],
                            strides=[1, 2, 2, 1], padding='SAME', name='pool2')
 
     with tf.name_scope('lrn2') as scope:
@@ -107,10 +108,10 @@ def Alexnet(x, opt, labels_id, dropout_rate):
         dim = int(prod(lrn2.get_shape()[1:]))
         pool_vec = tf.reshape(lrn2, [-1, dim])
 
-        nneurons = int(num_neurons[2] * opt.dnn.neuron_multiplier[2])
+        nneurons = int(num_neurons[2])
         weights = tf.get_variable(
             initializer=tf.truncated_normal([dim, nneurons],
-                                            stddev=0.04 / np.maximum(1, opt.dnn.neuron_multiplier[2]),
+                                            stddev=0.04 ,
                                             dtype=tf.float32), name='weights')
         biases = tf.get_variable(initializer=tf.constant(0.1, shape=[nneurons]), name='biases')
 
@@ -127,12 +128,12 @@ def Alexnet(x, opt, labels_id, dropout_rate):
     # local4
     with tf.variable_scope('local4', reuse=reuse) as scope:
         weights = tf.get_variable(
-            initializer=tf.truncated_normal([nneurons, int(num_neurons[3] * opt.dnn.neuron_multiplier[3])],
-                                            stddev=0.04 / np.maximum(1, opt.dnn.neuron_multiplier[3]),
+            initializer=tf.truncated_normal([nneurons, int(num_neurons[3])],
+                                            stddev=0.04 ,
                                             dtype=tf.float32), name='weights')
 
         biases = tf.get_variable(
-            initializer=tf.constant(0.1, shape=[int(num_neurons[3] * opt.dnn.neuron_multiplier[3])]), name='biases')
+            initializer=tf.constant(0.1, shape=[int(num_neurons[3])]), name='biases')
         local4t = tf.nn.relu(tf.matmul(local3, weights) + biases, name=scope.name)
         local4 = tf.nn.dropout(local4t, dropout_rate)
 
@@ -149,7 +150,7 @@ def Alexnet(x, opt, labels_id, dropout_rate):
     # and performs the softmax internally for efficiency.
     with tf.variable_scope('softmax_linear', reuse=reuse) as scope:
         weights = tf.get_variable(
-            initializer=tf.truncated_normal([int(num_neurons[3] * opt.dnn.neuron_multiplier[3]), len(labels_id)],
+            initializer=tf.truncated_normal([int(num_neurons[3]), len(labels_id)],
                                             stddev=1 / (float(num_neurons[3])), dtype=tf.float32),
             name='weights')
         biases = tf.get_variable(initializer=tf.constant(0.0, shape=[len(labels_id)]), name='biases')
