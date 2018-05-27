@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH -n 2
-#SBATCH --array=1-14
+#SBATCH --array=13-17
 #SBATCH --job-name=minimal
-#SBATCH --mem=16GB
+#SBATCH --mem=8GB
 #SBATCH --gres=gpu:1
 #SBATCH -t 10:00:00
 #SBATCH --workdir=./log/

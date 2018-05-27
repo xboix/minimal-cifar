@@ -16,7 +16,7 @@ def create_location_minimal_image_maps_multi(image_id, top5map_general, loose, k
     crop_metric (float): the crop metric we are referencing
     model_name (string): the model that we are referencing
     image_scale (float): the image scale we are referencing
-    loose (bool): loose minimal images if True else strict minimal images
+    amount_loose (bool): amount_loose minimal images if True else strict minimal images
     k (int): the square size that we are looking for minimal image change within; should be even
     '''
 
@@ -69,7 +69,7 @@ def create_location_minimal_image_maps_multi(image_id, top5map_general, loose, k
 
     #  save map
     ''' 
-    if loose:
+    if amount_loose:
         np.save(PATH_TO_DATA + settings.map_filename(settings.TOP5_MAPTYPE, crop_metric, model_name, image_scale,
                                                      image_id) + '_lmap.npy', M)
     else:
@@ -91,7 +91,7 @@ def create_location_minimal_image_maps(image_id, top5map, loose, k=1):
     crop_metric (float): the crop metric we are referencing
     model_name (string): the model that we are referencing
     image_scale (float): the image scale we are referencing
-    loose (bool): loose minimal images if True else strict minimal images
+    amount_loose (bool): amount_loose minimal images if True else strict minimal images
     k (int): the square size that we are looking for minimal image change within; should be even
     '''
 
@@ -138,7 +138,7 @@ def create_location_minimal_image_maps(image_id, top5map, loose, k=1):
 
     #  save map
     ''' 
-    if loose:
+    if amount_loose:
         np.save(PATH_TO_DATA + settings.map_filename(settings.TOP5_MAPTYPE, crop_metric, model_name, image_scale,
                                                      image_id) + '_lmap.npy', M)
     else:
@@ -190,8 +190,6 @@ for idx_metric, crop_metric in enumerate(experiments.crop_sizes):
             print(k)
             sys.stdout.flush()
             for image_id in range(TOTAL):
-
-
                 a, b = \
                     create_location_minimal_image_maps_multi(image_id, top5map, loose, k)
                 results[idx_metric][idx_loose][idx_k][image_id][0] = a

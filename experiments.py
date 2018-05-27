@@ -207,7 +207,7 @@ for name_NN, num_layers_NN, max_epochs_NN in zip(name, num_layers, max_epochs):
         idx += 1
 
     # Change number neurons for each layer
-    for multiplier in [3, 7, 13]:
+    for multiplier in [3, 7, 11, 15, 19, 23, 27]:
         opt += [Experiments(idx, name_NN + "_pooling_" + str(multiplier))]
 
         opt[-1].hyper.max_num_epochs = max_epochs_NN
