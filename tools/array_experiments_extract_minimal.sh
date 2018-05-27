@@ -16,7 +16,7 @@ counter=0
 while [ $counter -le 4 ]
 do
     singularity exec -B /cbcl/cbcl01/:/om/user/ --nv /cbcl/cbcl01/xboix/singularity/localtensorflow.img \
-    python /om/user/xboix/src/minimal-cifar/extract_minimal_small.py ${SLURM_ARRAY_TASK_ID} 0
+    python /om/user/xboix/src/minimal-cifar/extract_minimal_small.py ${SLURM_ARRAY_TASK_ID} $counter
     echo $counter
     ((counter++))
 done

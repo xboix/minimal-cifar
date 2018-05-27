@@ -59,7 +59,9 @@ test_iterator_full = test_dataset_full.make_initializable_iterator()
 # Get data from dataset dataset
 images_in, y_ = iterator.get_next()
 
-experiments.crop_sizes[crop_size] = experiments.crop_sizes[crop_size] - 2
+SHRINK = 2
+
+experiments.crop_sizes[crop_size] = experiments.crop_sizes[crop_size] - SHRINK
 
 patches = tf.extract_image_patches(
     images=images_in,
@@ -160,15 +162,15 @@ with tf.Session() as sess:
             print(num_iter)
             sys.stdout.flush()
 
-        with open(opt.log_dir_base + opt.name + '/maps/top/' + str(experiments.crop_sizes[crop_size])
+        with open(opt.log_dir_base + opt.name + '/maps/top/' + str(experiments.crop_sizes[crop_size]+SHRINK)
                   + '/maps_small.pkl', 'wb') as f:
             pickle.dump(pred_map_total, f)
 
-        with open(opt.log_dir_base + opt.name + '/maps/confidence/' + str(experiments.crop_sizes[crop_size])
+        with open(opt.log_dir_base + opt.name + '/maps/confidence/' + str(experiments.crop_sizes[crop_size]+SHRINK)
                  + '/maps_small.pkl', 'wb') as f:
             pickle.dump(top_map_total, f)
 
-        with open(opt.log_dir_base + opt.name + '/maps/top_multi/' + str(experiments.crop_sizes[crop_size])
+        with open(opt.log_dir_base + opt.name + '/maps/top_multi/' + str(experiments.crop_sizes[crop_size]+SHRINK)
                  + '/maps_small.pkl', 'wb') as f:
             pickle.dump(top_multi_total, f)
 
