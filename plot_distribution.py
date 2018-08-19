@@ -31,159 +31,174 @@ import seaborn as sns
 PATH_TO_DATA = "./results/" #"/om/user/xboix/share/minimal-images/"
 #"
 
-TOTAL = 1000
+TOTAL = 10000
 
 crops = [28, 24, 18, 12, 6]
-for STRICT, strict_name in enumerate(['strict', 'loose']):
-    for kk in ['', 'multi']:
 
-        all_nets = [experiments.opt[i+1].name for i in range(5)]
-        name_nets = ['28 pix.', '$\geq$24 pix.',
-                     '$\geq$18 pix.', '$\geq$12 pix.',
-                     '$\geq$6 pix.']
+for SMALL in ['small', '']:
+    for STRICT, strict_name in enumerate(['strict', 'loose']):
+        for kk in ['', 'multi']:
 
-        for idx_metric, crop_metric in enumerate(crops):
-            cc = itertools.cycle(sns.cubehelix_palette(8))
+            all_nets = [experiments.opt[i+1].name for i in range(5)]
+            name_nets = ['28 pix.', '$\geq$24 pix.',
+                         '$\geq$18 pix.', '$\geq$12 pix.',
+                         '$\geq$6 pix.']
 
-            fig, ax = pyplot.subplots()
-            for idx_net, nets in enumerate(all_nets):
-                tmp = np.load(PATH_TO_DATA + '/tmp_results_' + kk + nets + '.npy')
-                mm = np.zeros([TOTAL])
-                for image_id in range(TOTAL):
-                    mm[image_id] += tmp[idx_metric][STRICT][0][image_id][0]
-                    mm[image_id] += tmp[idx_metric][STRICT][0][image_id][1]
+            for idx_metric, crop_metric in enumerate(crops):
+                cc = itertools.cycle(sns.cubehelix_palette(8))
 
-                if idx_net == 0:
-                    sns.kdeplot(100*mm, clip=(0.0, 100.0), label=name_nets[idx_net], linewidth=4)
+                fig, ax = pyplot.subplots()
+                for idx_net, nets in enumerate(all_nets):
+                    if SMALL == '':
+                        tmp = np.load(PATH_TO_DATA + '/tmp_results_' + kk + nets + '.npy')
+                    else:
+                        tmp = np.load(PATH_TO_DATA + '/tmp_results_' + kk + nets + '_' + SMALL +'.npy')
+
+                    mm = np.zeros([TOTAL])
+                    for image_id in range(TOTAL):
+                        mm[image_id] += tmp[idx_metric][STRICT][0][image_id][0]
+                        mm[image_id] += tmp[idx_metric][STRICT][0][image_id][1]
+
+                    if idx_net == 0:
+                        sns.kdeplot(100*mm, clip=(0.0, 100.0), label=name_nets[idx_net], linewidth=4)
+                    else:
+                        sns.kdeplot(100*mm, clip=(0.0, 100.0), label=name_nets[idx_net], linewidth=4, color = next(cc))
+
+                ax.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
+                ax.ticklabel_format(useOffset=True)
+
+                mf = mpl.ticker.ScalarFormatter(useMathText=True)
+                mf.set_powerlimits((-2, 10))
+                pyplot.gca().yaxis.set_major_formatter(mf)
+
+                ax.set_title(str(crops[idx_metric]) + 'pix. Min. Images')
+
+                ax.set_xlabel('% of Crops Sensitive to 1 Pixel Shifts')
+                ax.set_ylabel('Probability Density')
+                if idx_metric>1:
+                    loc = 'upper left'
                 else:
-                    sns.kdeplot(100*mm, clip=(0.0, 100.0), label=name_nets[idx_net], linewidth=4, color = next(cc))
+                    loc = 'upper right'
+                ax.legend(loc=loc, frameon=True, title="Crops at Training")
 
-            ax.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
-            ax.ticklabel_format(useOffset=True)
+                for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
+                             ax.get_xticklabels() + ax.get_yticklabels()):
+                    item.set_fontsize(25)
+                if STRICT:
+                    pyplot.xlim((0, 100.0))
 
-            mf = mpl.ticker.ScalarFormatter(useMathText=True)
-            mf.set_powerlimits((-2, 10))
-            pyplot.gca().yaxis.set_major_formatter(mf)
+                pyplot.gcf().subplots_adjust(bottom=0.17, top=0.90, left=0.20, right=0.96)
 
-            ax.set_title(str(crops[idx_metric]) + 'pix. Min. Images')
-
-            ax.set_xlabel('% of Crops Sensitive to 1 Pixel Shifts')
-            ax.set_ylabel('Probability Density')
-            if idx_metric>1:
-                loc = 'upper left'
-            else:
-                loc = 'upper right'
-            ax.legend(loc=loc, frameon=True, title="Crops at Training")
-
-            for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
-                         ax.get_xticklabels() + ax.get_yticklabels()):
-                item.set_fontsize(25)
-            if STRICT:
-                pyplot.xlim((0, 100.0))
-
-            pyplot.gcf().subplots_adjust(bottom=0.17, top=0.90, left=0.20, right=0.96)
-
-            pyplot.savefig('./plots/distributions_'+strict_name+'/distribution_augmentation_' + str(crop_metric) + kk + '.pdf', dpi=1000)
+                pyplot.savefig('./plots/distributions_'+strict_name+
+                               '/distribution_augmentation_' + str(crop_metric) + kk + SMALL+ '.pdf', dpi=1000)
 
 
 
-        all_nets = [experiments.opt[i+6].name for i in range(5)]
-        name_nets = ['Non Regularized', 'Data augment.',
-                     'Dropout', 'Weight Decay',
-                     'All Regularizers']
+            all_nets = [experiments.opt[i+6].name for i in range(5)]
+            name_nets = ['Non Regularized', 'Data augment.',
+                         'Dropout', 'Weight Decay',
+                         'All Regularizers']
 
-        colors = ["amber", "greyish", "orange", "black"]
+            colors = ["amber", "greyish", "orange", "black"]
 
-        for idx_metric, crop_metric in enumerate(crops):
-            cc = itertools.cycle(sns.xkcd_palette(colors))
-            fig, ax = pyplot.subplots()
-            for idx_net, nets in enumerate(all_nets):
+            for idx_metric, crop_metric in enumerate(crops):
+                cc = itertools.cycle(sns.xkcd_palette(colors))
+                fig, ax = pyplot.subplots()
+                for idx_net, nets in enumerate(all_nets):
+                    if SMALL == '':
+                        tmp = np.load(PATH_TO_DATA + '/tmp_results_'+ kk + nets + '.npy')
+                    else:
+                        tmp = np.load(PATH_TO_DATA + '/tmp_results_' + kk + nets + '_' + SMALL +'.npy')
 
-                tmp = np.load(PATH_TO_DATA + '/tmp_results_'+ kk + nets + '.npy')
-                mm = np.zeros([TOTAL])
-                for image_id in range(TOTAL):
-                    mm[image_id] += tmp[idx_metric][STRICT][0][image_id][0]
-                    mm[image_id] += tmp[idx_metric][STRICT][0][image_id][1]
+                    mm = np.zeros([TOTAL])
+                    for image_id in range(TOTAL):
+                        mm[image_id] += tmp[idx_metric][STRICT][0][image_id][0]
+                        mm[image_id] += tmp[idx_metric][STRICT][0][image_id][1]
 
-                if idx_net == 0:
-                    sns.kdeplot(100*mm, clip=(0.0, 100.0), label=name_nets[idx_net], linewidth=4)
+                    if idx_net == 0:
+                        sns.kdeplot(100*mm, clip=(0.0, 100.0), label=name_nets[idx_net], linewidth=4)
+                    else:
+                        sns.kdeplot(100*mm, clip=(0.0, 100.0), label=name_nets[idx_net], linewidth=4, color = next(cc))
+
+                ax.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
+                ax.ticklabel_format(useOffset=True)
+
+                mf = mpl.ticker.ScalarFormatter(useMathText=True)
+                mf.set_powerlimits((-2, 10))
+                pyplot.gca().yaxis.set_major_formatter(mf)
+
+                ax.set_title(  str(crops[idx_metric]) + 'pix. Minimal Images')
+                ax.set_xlabel('% of Crops Sensitive to 1 Pixel Shifts')
+                ax.set_ylabel('Probability Density')
+
+                if idx_metric>1:
+                    loc = 'upper left'
                 else:
-                    sns.kdeplot(100*mm, clip=(0.0, 100.0), label=name_nets[idx_net], linewidth=4, color = next(cc))
+                    loc = 'upper right'
 
-            ax.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
-            ax.ticklabel_format(useOffset=True)
+                ax.legend(loc=loc, frameon=True, title="Regularizers")
 
-            mf = mpl.ticker.ScalarFormatter(useMathText=True)
-            mf.set_powerlimits((-2, 10))
-            pyplot.gca().yaxis.set_major_formatter(mf)
+                for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
+                             ax.get_xticklabels() + ax.get_yticklabels()):
+                    item.set_fontsize(25)
+                if STRICT:
+                    pyplot.xlim((0, 100.0))
 
-            ax.set_title(  str(crops[idx_metric]) + 'pix. Minimal Images')
-            ax.set_xlabel('% of Crops Sensitive to 1 Pixel Shifts')
-            ax.set_ylabel('Probability Density')
+                pyplot.gcf().subplots_adjust(bottom=0.17, top=0.85, left=0.20, right=0.96)
 
-            if idx_metric>1:
-                loc = 'upper left'
-            else:
-                loc = 'upper right'
-
-            ax.legend(loc=loc, frameon=True, title="Regularizers")
-
-            for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
-                         ax.get_xticklabels() + ax.get_yticklabels()):
-                item.set_fontsize(25)
-            if STRICT:
-                pyplot.xlim((0, 100.0))
-
-            pyplot.gcf().subplots_adjust(bottom=0.17, top=0.85, left=0.20, right=0.96)
-
-            pyplot.savefig('./plots/distributions_'+strict_name+'/distribution_regularizers_' + str(crop_metric) + kk + '.pdf', dpi=1000)
+                pyplot.savefig('./plots/distributions_'+strict_name+
+                               '/distribution_regularizers_' + str(crop_metric) + kk + SMALL+'.pdf', dpi=1000)
 
 
 
+            all_nets = [experiments.opt[i + 11].name for i in range(6)]
 
-        all_nets = [experiments.opt[i+11].name for i in range(3)]
-        name_nets = ['3x3', '7x7',
-                     '13x13']
+            name_nets = ['3', '9', '15', '21', '27', '32']#, '19x19', '23x23', '27x27']
 
-        for idx_metric, crop_metric in enumerate(crops):
-            cc = itertools.cycle(sns.cubehelix_palette(3, start=.5, rot=-.75))
+            for idx_metric, crop_metric in enumerate(crops):
+                cc = itertools.cycle(sns.cubehelix_palette(7, start=.5, rot=-.75))
 
-            fig, ax = pyplot.subplots()
-            for idx_net, nets in enumerate(all_nets):
-                tmp = np.load(PATH_TO_DATA + '/tmp_results_' + kk + nets + '.npy')
-                mm = np.zeros([TOTAL])
-                for image_id in range(TOTAL):
-                    mm[image_id] += tmp[idx_metric][STRICT][0][image_id][0]
-                    mm[image_id] += tmp[idx_metric][STRICT][0][image_id][1]
+                fig, ax = pyplot.subplots()
+                for idx_net, nets in enumerate(all_nets):
+                    if SMALL == '':
+                        tmp = np.load(PATH_TO_DATA + '/tmp_results_' + kk + nets + '.npy')
+                    else:
+                        tmp = np.load(PATH_TO_DATA + '/tmp_results_' + kk + nets + '_' + SMALL +'.npy')
 
-                if idx_net == 0:
-                    sns.kdeplot(100*mm, clip=(0.0, 100.0), label=name_nets[idx_net], linewidth=4)
+                    mm = np.zeros([TOTAL])
+                    for image_id in range(TOTAL):
+                        mm[image_id] += tmp[idx_metric][STRICT][0][image_id][0]
+                        mm[image_id] += tmp[idx_metric][STRICT][0][image_id][1]
+
+                    if idx_net == 0:
+                        sns.kdeplot(100*mm, clip=(0.0, 100.0), label=name_nets[idx_net], linewidth=4)
+                    else:
+                        sns.kdeplot(100*mm, clip=(0.0, 100.0), label=name_nets[idx_net], linewidth=4, color = next(cc))
+
+                ax.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
+                ax.ticklabel_format(useOffset=True)
+
+                mf = mpl.ticker.ScalarFormatter(useMathText=True)
+                mf.set_powerlimits((-2, 10))
+                pyplot.gca().yaxis.set_major_formatter(mf)
+
+                ax.set_title( str(crops[idx_metric]) + 'pix. Minimal Images')
+                ax.set_xlabel('% of Crops Sensitive to 1 Pixel Shifts')
+                ax.set_ylabel('Probability Density')
+                if idx_metric>1:
+                    loc = 'upper left'
                 else:
-                    sns.kdeplot(100*mm, clip=(0.0, 100.0), label=name_nets[idx_net], linewidth=4, color = next(cc))
+                    loc = 'upper right'
+                ax.legend(loc = loc, frameon=True, title="Pooling Size")
 
-            ax.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
-            ax.ticklabel_format(useOffset=True)
+                for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
+                             ax.get_xticklabels() + ax.get_yticklabels()):
+                    item.set_fontsize(25)
+                if STRICT:
+                    pyplot.xlim((0, 100.0))
 
-            mf = mpl.ticker.ScalarFormatter(useMathText=True)
-            mf.set_powerlimits((-2, 10))
-            pyplot.gca().yaxis.set_major_formatter(mf)
+                pyplot.gcf().subplots_adjust(bottom=0.17, top=0.85, left=0.20, right=0.96)
 
-            ax.set_title( str(crops[idx_metric]) + 'pix. Minimal Images')
-            ax.set_xlabel('% of Crops Sensitive to 1 Pixel Shifts')
-            ax.set_ylabel('Probability Density')
-            if idx_metric>1:
-                loc = 'upper left'
-            else:
-                loc = 'upper right'
-            ax.legend(loc = loc, frameon=True, title="Pooling Size")
-
-            for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
-                         ax.get_xticklabels() + ax.get_yticklabels()):
-                item.set_fontsize(25)
-            if STRICT:
-                pyplot.xlim((0, 100.0))
-
-            pyplot.gcf().subplots_adjust(bottom=0.17, top=0.85, left=0.20, right=0.96)
-
-            pyplot.savefig('./plots/distributions_'+strict_name+'/distribution_pooling_' + str(crop_metric) + kk + '.pdf', dpi=1000)
+                pyplot.savefig('./plots/distributions_'+strict_name+
+                               '/distribution_pooling_' + str(crop_metric) + kk + SMALL+'.pdf', dpi=1000)
 

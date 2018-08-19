@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -n 2
-#SBATCH --array=1-17
+#SBATCH --array=1-10
 #SBATCH --job-name=minimal
 #SBATCH --mem=16GB
 #SBATCH --gres=gpu:1
@@ -12,6 +12,7 @@ hostname
 
 cd /cbcl/cbcl01/xboix/src/minimal-cifar/
 
+
 counter=0
 while [ $counter -le 4 ]
 do
@@ -20,4 +21,3 @@ do
     echo $counter
     ((counter++))
 done
-

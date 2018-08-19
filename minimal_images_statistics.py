@@ -152,7 +152,7 @@ def create_location_minimal_image_maps(image_id, top5map, loose, k=1):
 
     return num_pos_min_imgs / float(M.size), num_neg_min_imgs / float(M.size)
 
-TOTAL = 1000
+TOTAL = 10000
 results = - np.ones([5, 2, 5, TOTAL, 2])
 
 

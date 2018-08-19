@@ -30,19 +30,19 @@ PATH_TO_DATA = "./results/" #"/om/user/xboix/share/minimal-images/"
 
 
 
-TOTAL = 1000
+TOTAL = 10000
 
 all_nets = [experiments.opt[i+1].name for i in range(5)]
-crops = [28, 24, 18, 12, 6]
+crops = [28, 24, 20, 16, 12]
 
 name_nets = ['28 pix.', '$\geq$24 pix.',
-             '$\geq$18 pix.', '$\geq$12 pix.',
-             '$\geq$6 pix.']
+             '$\geq$20 pix.', '$\geq$16 pix.',
+             '$\geq$12 pix.']
 
 mm = np.zeros([len(all_nets), len(crops)])
 for idx_net, nets in enumerate(all_nets):
     tmp = np.load(PATH_TO_DATA + 'tmp_results_accuracy' + nets + '.npy')
-    for idx_metric, crop_metric in enumerate([28, 24, 18, 12, 6]):
+    for idx_metric, crop_metric in enumerate([28, 24, 20, 16, 12]):
         mm[idx_net][idx_metric] = tmp[idx_metric]
 
 cc = itertools.cycle(sns.cubehelix_palette(8))
@@ -59,7 +59,7 @@ for idx_net, nets in enumerate(['3', '8', '13', '18', '23']):
 
     ax.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 
-pyplot.xticks([28, 24, 18, 12, 6], ['28', '24', '18', '12', '6'])
+pyplot.xticks([28, 24, 20, 16, 12], ['28', '24', '20', '16', '12'])
 
 
 ax.legend(loc='lower right', frameon= True, title="Crops at Training")
@@ -108,7 +108,7 @@ for idx_net, nets in enumerate(['3', '8', '13', '18', '23']):
 
     ax.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 
-pyplot.xticks(crops, ['28', '24', '18', '12', '6'])
+pyplot.xticks([28, 24, 20, 16, 12], ['28', '24', '20', '16', '12'])
 
 ax.legend(loc='lower right',frameon= True, title='Regularizers')
 ax.set_xlabel('Crop Size')
@@ -127,10 +127,9 @@ pyplot.savefig('./plots/accuracy/accuracy_regularizers.pdf', dpi=1000)
 
 ################################################################################################################
 
-all_nets = [experiments.opt[i+11].name for i in range(3)]
+all_nets = [experiments.opt[i+11].name for i in range(6)]
 
-name_nets = ['3x3', '7x7',
-             '13x13']
+name_nets = ['3', '9', '15', '21', '27', '32']#, '19x19', '23x23', '27x27']
 
 mm = np.zeros([len(all_nets), len(crops)])
 for idx_net, nets in enumerate(all_nets):
@@ -138,7 +137,7 @@ for idx_net, nets in enumerate(all_nets):
     for idx_metric, crop_metric in enumerate([28, 24, 18, 12, 6]):
         mm[idx_net][idx_metric] = tmp[idx_metric]
 
-cc = itertools.cycle(sns.cubehelix_palette(3, start=.5, rot=-.75))
+cc = itertools.cycle(sns.cubehelix_palette(7, start=.5, rot=-.75))
 fig, ax = pyplot.subplots()
 for idx_net, nets in enumerate(all_nets):
     q = np.zeros(5)
@@ -153,7 +152,7 @@ for idx_net, nets in enumerate(all_nets):
 
     ax.get_xaxis().set_major_formatter(mpl.ticker.ScalarFormatter())
 
-pyplot.xticks([28, 24, 18, 12, 6], ['28', '24', '18', '12', '6'])
+pyplot.xticks([28, 24, 20, 16, 12], ['28', '24', '20', '16', '12'])
 
 ax.legend(loc='upper left',frameon= True, title='Pooling Size')
 ax.set_xlabel('Crop Size')

@@ -67,6 +67,7 @@ class DNN(object):
         self.pretrained = False
         self.version = 1
         self.layers = 4
+        self.stride = 2
         self.neuron_multiplier = np.ones([self.layers])
 
     def set_num_layers(self, num_layers):
@@ -95,7 +96,7 @@ class Experiments(object):
 
     def __init__(self, id, name):
         self.name = "base"
-        self.log_dir_base = "/om/user/xboix/share/minimal-images/models/"
+        self.log_dir_base = "/om/user/xboix/share/minimal-images/models-cifar/"
             #"/Users/xboix/src/minimal-cifar/log/"
             #"/om/user/xboix/src/robustness/robustness/log/"
             #"/om/user/xboix/src/robustness/robustness/log/"
@@ -147,7 +148,7 @@ opt = []
 plot_freezing = []
 
 neuron_multiplier = [0.25, 0.5, 1, 2, 4]
-crop_sizes = [28, 24, 18, 12, 6]
+crop_sizes = [28, 24, 20, 16, 12]
 training_data = [1]
 name = ["Alexnet"]
 num_layers = [5]
@@ -207,12 +208,13 @@ for name_NN, num_layers_NN, max_epochs_NN in zip(name, num_layers, max_epochs):
         idx += 1
 
     # Change number neurons for each layer
-    for multiplier in [3, 7, 11, 15, 19, 23, 27]:
+    for multiplier in [3, 9, 15, 21, 27, 32]:
         opt += [Experiments(idx, name_NN + "_pooling_" + str(multiplier))]
 
         opt[-1].hyper.max_num_epochs = max_epochs_NN
         opt[-1].hyper.crop_size = 0
         opt[-1].dnn.name = name_NN
+        opt[-1].dnn.stride = 1
         opt[-1].dnn.set_num_layers(num_layers_NN)
         opt[-1].dnn.neuron_multiplier.fill(multiplier)
 

@@ -28,8 +28,11 @@ def conv(input, kernel, biases, k_h, k_w, c_o, s_h, s_w, padding="VALID", group=
 
 def Alexnet(x, opt, labels_id, dropout_rate):
     reuse = False
-
     global num_neurons
+
+    STRIDE = opt.dnn.stride
+
+
 
     parameters = []
     activations = []
@@ -45,15 +48,15 @@ def Alexnet(x, opt, labels_id, dropout_rate):
         pre_activation = tf.nn.bias_add(conv, biases)
         conv1 = tf.nn.relu(pre_activation, name=scope.name)
 
-        print(np.prod(conv1.shape[1:]))
+        print(conv1.shape[1:])
 
         summ.variable_summaries(kernel, biases, opt)
         summ.activation_summaries(conv1, opt)
         activations += [conv1]
 
     # pool1
-    pool1 = tf.nn.max_pool(conv1, ksize=[1, opt.dnn.neuron_multiplier[0], opt.dnn.neuron_multiplier[0], 1],
-                           strides=[1, 2, 2, 1],
+    pool1 = tf.nn.max_pool(conv1, ksize=[1, 3, 3,  1],
+                           strides=[1, 1, 1, 1],
                            padding='SAME', name='pool1')
 
     with tf.name_scope('lrn1') as scope:
@@ -80,15 +83,19 @@ def Alexnet(x, opt, labels_id, dropout_rate):
         pre_activation = tf.nn.bias_add(conv, biases)
         conv2 = tf.nn.relu(pre_activation, name=scope.name)
 
-        print(np.prod(conv2.shape[1:]))
+        print(conv2.shape[1:])
 
         summ.variable_summaries(kernel, biases, opt)
         summ.activation_summaries(conv2, opt)
         activations += [conv2]
 
     # pool2
-    pool2 = tf.nn.max_pool(conv2, ksize=[1, opt.dnn.neuron_multiplier[1], opt.dnn.neuron_multiplier[1], 1],
-                           strides=[1, 2, 2, 1], padding='SAME', name='pool2')
+    if STRIDE == 1:
+        pool2 = tf.nn.max_pool(conv2, ksize=[1, opt.dnn.neuron_multiplier[1], opt.dnn.neuron_multiplier[1], 1],
+                             strides=[1, STRIDE, STRIDE, 1], padding='VALID', name='pool2')
+    else:
+        pool2 = tf.nn.max_pool(conv2, ksize=[1, opt.dnn.neuron_multiplier[1], opt.dnn.neuron_multiplier[1], 1],
+                             strides=[1, STRIDE, STRIDE, 1], padding='SAME', name='pool2')
 
     with tf.name_scope('lrn2') as scope:
         radius = 2;
@@ -104,6 +111,7 @@ def Alexnet(x, opt, labels_id, dropout_rate):
     # local3
     with tf.variable_scope('local3', reuse=reuse) as scope:
         # Move everything into depth so we can perform a single matrix multiply.
+        print(lrn2.shape[1:])
 
         dim = int(prod(lrn2.get_shape()[1:]))
         pool_vec = tf.reshape(lrn2, [-1, dim])

@@ -95,7 +95,7 @@ def create_location_minimal_image_maps(image_id, top5map, top5map_small, loose, 
 
 
 
-TOTAL = 1000
+TOTAL = 10000
 results = - np.ones([5, 2, 5, TOTAL, 2])
 
 for idx_metric, crop_metric in enumerate(experiments.crop_sizes):

@@ -11,7 +11,7 @@ from nets import nets
 from util import summary
 import pickle
 
-TOTAL = 1000
+TOTAL = 10000
 
 ################################################################################################
 # Read experiment to run
