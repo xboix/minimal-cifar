@@ -1,0 +1,166 @@
+2018-08-19 20:52:01.951709: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.1 instructions, but these are available on your machine and could speed up CPU computations.
+2018-08-19 20:52:01.952438: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.2 instructions, but these are available on your machine and could speed up CPU computations.
+2018-08-19 20:52:01.952466: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX instructions, but these are available on your machine and could speed up CPU computations.
+2018-08-19 20:52:01.952482: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX2 instructions, but these are available on your machine and could speed up CPU computations.
+2018-08-19 20:52:01.952496: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use FMA instructions, but these are available on your machine and could speed up CPU computations.
+2018-08-19 20:52:02.163425: I tensorflow/core/common_runtime/gpu/gpu_device.cc:955] Found device 0 with properties: 
+name: GeForce GTX TITAN X
+major: 5 minor: 2 memoryClockRate (GHz) 1.076
+pciBusID 0000:06:00.0
+Total memory: 11.93GiB
+Free memory: 353.81MiB
+2018-08-19 20:52:02.364016: W tensorflow/stream_executor/cuda/cuda_driver.cc:523] A non-primary context 0x95c9c70 exists before initializing the StreamExecutor. We haven't verified StreamExecutor works with that.
+2018-08-19 20:52:02.364594: I tensorflow/core/common_runtime/gpu/gpu_device.cc:955] Found device 1 with properties: 
+name: GeForce GTX TITAN X
+major: 5 minor: 2 memoryClockRate (GHz) 1.076
+pciBusID 0000:81:00.0
+Total memory: 11.93GiB
+Free memory: 494.94MiB
+2018-08-19 20:52:02.364648: I tensorflow/core/common_runtime/gpu/gpu_device.cc:847] Peer access not supported between device ordinals 0 and 1
+2018-08-19 20:52:02.364679: I tensorflow/core/common_runtime/gpu/gpu_device.cc:847] Peer access not supported between device ordinals 1 and 0
+2018-08-19 20:52:02.364713: I tensorflow/core/common_runtime/gpu/gpu_device.cc:976] DMA: 0 1 
+2018-08-19 20:52:02.364732: I tensorflow/core/common_runtime/gpu/gpu_device.cc:986] 0:   Y N 
+2018-08-19 20:52:02.364747: I tensorflow/core/common_runtime/gpu/gpu_device.cc:986] 1:   N Y 
+2018-08-19 20:52:02.364766: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1045] Creating TensorFlow device (/gpu:0) -> (device: 0, name: GeForce GTX TITAN X, pci bus id: 0000:06:00.0)
+2018-08-19 20:52:02.364783: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1045] Creating TensorFlow device (/gpu:1) -> (device: 1, name: GeForce GTX TITAN X, pci bus id: 0000:81:00.0)
+2018-08-19 20:52:19.776304: W tensorflow/core/common_runtime/bfc_allocator.cc:273] Allocator (GPU_0_bfc) ran out of memory trying to allocate 1.5KiB.  Current allocation summary follows.
+2018-08-19 20:52:19.786313: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (256): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.786386: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (512): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.786427: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (1024): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.786463: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (2048): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.786498: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (4096): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.786555: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (8192): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.786599: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (16384): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.786636: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (32768): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.786671: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (65536): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.786705: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (131072): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.786740: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (262144): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.786774: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (524288): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.786810: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (1048576): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.786845: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (2097152): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.786880: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (4194304): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.786914: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (8388608): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.786949: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (16777216): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.786984: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (33554432): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.787018: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (67108864): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.787087: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (134217728): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.787129: I tensorflow/core/common_runtime/bfc_allocator.cc:643] Bin (268435456): 	Total Chunks: 0, Chunks in use: 0 0B allocated for chunks. 0B client-requested for chunks. 0B in use in bin. 0B client-requested in use in bin.
+2018-08-19 20:52:19.787165: I tensorflow/core/common_runtime/bfc_allocator.cc:660] Bin for 1.5KiB was 1.0KiB, Chunk State: 
+2018-08-19 20:52:19.787200: I tensorflow/core/common_runtime/bfc_allocator.cc:678] Chunk at 0x4214800000 of size 1280
+2018-08-19 20:52:19.787267: I tensorflow/core/common_runtime/bfc_allocator.cc:678] Chunk at 0x4214800500 of size 256
+2018-08-19 20:52:19.787319: I tensorflow/core/common_runtime/bfc_allocator.cc:678] Chunk at 0x4214800600 of size 256
+2018-08-19 20:52:19.787353: I tensorflow/core/common_runtime/bfc_allocator.cc:678] Chunk at 0x4214800700 of size 512
+2018-08-19 20:52:19.787386: I tensorflow/core/common_runtime/bfc_allocator.cc:678] Chunk at 0x4214800900 of size 1024
+2018-08-19 20:52:19.787417: I tensorflow/core/common_runtime/bfc_allocator.cc:678] Chunk at 0x4214800d00 of size 256
+2018-08-19 20:52:19.787447: I tensorflow/core/common_runtime/bfc_allocator.cc:678] Chunk at 0x4214800e00 of size 1536
+2018-08-19 20:52:19.787478: I tensorflow/core/common_runtime/bfc_allocator.cc:678] Chunk at 0x4214801400 of size 768
+2018-08-19 20:52:19.787508: I tensorflow/core/common_runtime/bfc_allocator.cc:678] Chunk at 0x4214801700 of size 256
+2018-08-19 20:52:19.787538: I tensorflow/core/common_runtime/bfc_allocator.cc:678] Chunk at 0x4214801800 of size 256
+2018-08-19 20:52:19.787568: I tensorflow/core/common_runtime/bfc_allocator.cc:678] Chunk at 0x4214801900 of size 28928
+2018-08-19 20:52:19.787598: I tensorflow/core/common_runtime/bfc_allocator.cc:678] Chunk at 0x4214808a00 of size 512
+2018-08-19 20:52:19.787629: I tensorflow/core/common_runtime/bfc_allocator.cc:678] Chunk at 0x4214808c00 of size 2457600
+2018-08-19 20:52:19.787659: I tensorflow/core/common_runtime/bfc_allocator.cc:678] Chunk at 0x4214a60c00 of size 1024
+2018-08-19 20:52:19.787689: I tensorflow/core/common_runtime/bfc_allocator.cc:678] Chunk at 0x4214a61000 of size 132575232
+2018-08-19 20:52:19.787720: I tensorflow/core/common_runtime/bfc_allocator.cc:693]      Summary of in-use Chunks by size: 
+2018-08-19 20:52:19.787755: I tensorflow/core/common_runtime/bfc_allocator.cc:696] 5 Chunks of size 256 totalling 1.2KiB
+2018-08-19 20:52:19.787788: I tensorflow/core/common_runtime/bfc_allocator.cc:696] 2 Chunks of size 512 totalling 1.0KiB
+2018-08-19 20:52:19.787821: I tensorflow/core/common_runtime/bfc_allocator.cc:696] 1 Chunks of size 768 totalling 768B
+2018-08-19 20:52:19.787853: I tensorflow/core/common_runtime/bfc_allocator.cc:696] 2 Chunks of size 1024 totalling 2.0KiB
+2018-08-19 20:52:19.787885: I tensorflow/core/common_runtime/bfc_allocator.cc:696] 1 Chunks of size 1280 totalling 1.2KiB
+2018-08-19 20:52:19.787917: I tensorflow/core/common_runtime/bfc_allocator.cc:696] 1 Chunks of size 1536 totalling 1.5KiB
+2018-08-19 20:52:19.787952: I tensorflow/core/common_runtime/bfc_allocator.cc:696] 1 Chunks of size 28928 totalling 28.2KiB
+2018-08-19 20:52:19.787984: I tensorflow/core/common_runtime/bfc_allocator.cc:696] 1 Chunks of size 2457600 totalling 2.34MiB
+2018-08-19 20:52:19.788019: I tensorflow/core/common_runtime/bfc_allocator.cc:696] 1 Chunks of size 132575232 totalling 126.43MiB
+2018-08-19 20:52:19.788075: I tensorflow/core/common_runtime/bfc_allocator.cc:700] Sum Total of in-use chunks: 128.81MiB
+2018-08-19 20:52:19.788115: I tensorflow/core/common_runtime/bfc_allocator.cc:702] Stats: 
+Limit:                   135069696
+InUse:                   135069696
+MaxInUse:                135069696
+NumAllocs:                      15
+MaxAllocSize:            132575232
+
+2018-08-19 20:52:19.788152: W tensorflow/core/common_runtime/bfc_allocator.cc:277] *****************************************************************************xxxxxxxxxxxxxxxxxxxxxxx
+2018-08-19 20:52:19.788207: W tensorflow/core/framework/op_kernel.cc:1182] Resource exhausted: OOM when allocating tensor of shape [384] and type float
+2018-08-19 20:52:19.788379: E tensorflow/core/common_runtime/executor.cc:644] Executor failed to create kernel. Resource exhausted: OOM when allocating tensor of shape [384] and type float
+	 [[Node: local3/biases/Momentum/Initializer/zeros = Const[_class=["loc:@local3/biases"], dtype=DT_FLOAT, value=Tensor<type: float shape: [384] values: 0 0 0...>, _device="/job:localhost/replica:0/task:0/gpu:0"]()]]
+ID0_data
+(32, 32, 96)
+(32, 32, 256)
+(16, 16, 256)
+384
+192
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1327, in _do_call
+    return fn(*args)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1306, in _run_fn
+    status, run_metadata)
+  File "/usr/lib/python3.5/contextlib.py", line 66, in __exit__
+    next(self.gen)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/framework/errors_impl.py", line 466, in raise_exception_on_not_ok_status
+    pywrap_tensorflow.TF_GetCode(status))
+tensorflow.python.framework.errors_impl.ResourceExhaustedError: OOM when allocating tensor of shape [384] and type float
+	 [[Node: local3/biases/Momentum/Initializer/zeros = Const[_class=["loc:@local3/biases"], dtype=DT_FLOAT, value=Tensor<type: float shape: [384] values: 0 0 0...>, _device="/job:localhost/replica:0/task:0/gpu:0"]()]]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/om/user/sanjanas/minimal-cifar/main.py", line 197, in <module>
+    sess.run(tf.global_variables_initializer())
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 895, in run
+    run_metadata_ptr)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1124, in _run
+    feed_dict_tensor, options, run_metadata)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1321, in _do_run
+    options, run_metadata)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/client/session.py", line 1340, in _do_call
+    raise type(e)(node_def, op, message)
+tensorflow.python.framework.errors_impl.ResourceExhaustedError: OOM when allocating tensor of shape [384] and type float
+	 [[Node: local3/biases/Momentum/Initializer/zeros = Const[_class=["loc:@local3/biases"], dtype=DT_FLOAT, value=Tensor<type: float shape: [384] values: 0 0 0...>, _device="/job:localhost/replica:0/task:0/gpu:0"]()]]
+
+Caused by op 'local3/biases/Momentum/Initializer/zeros', defined at:
+  File "/om/user/sanjanas/minimal-cifar/main.py", line 175, in <module>
+    train_step = tf.train.MomentumOptimizer(learning_rate=lr, momentum=opt.hyper.momentum).minimize(total_loss, var_list=all_var)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/training/optimizer.py", line 325, in minimize
+    name=name)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/training/optimizer.py", line 446, in apply_gradients
+    self._create_slots([_get_variable_for(v) for v in var_list])
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/training/momentum.py", line 66, in _create_slots
+    self._zeros_slot(v, "momentum", self._name)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/training/optimizer.py", line 766, in _zeros_slot
+    named_slots[_var_key(var)] = slot_creator.create_zeros_slot(var, op_name)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/training/slot_creator.py", line 174, in create_zeros_slot
+    colocate_with_primary=colocate_with_primary)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/training/slot_creator.py", line 146, in create_slot_with_initializer
+    dtype)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/training/slot_creator.py", line 66, in _create_slot_var
+    validate_shape=validate_shape)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/ops/variable_scope.py", line 1065, in get_variable
+    use_resource=use_resource, custom_getter=custom_getter)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/ops/variable_scope.py", line 962, in get_variable
+    use_resource=use_resource, custom_getter=custom_getter)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/ops/variable_scope.py", line 367, in get_variable
+    validate_shape=validate_shape, use_resource=use_resource)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/ops/variable_scope.py", line 352, in _true_getter
+    use_resource=use_resource)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/ops/variable_scope.py", line 725, in _get_single_variable
+    validate_shape=validate_shape)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/ops/variables.py", line 199, in __init__
+    expected_shape=expected_shape)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/ops/variables.py", line 277, in _init_from_args
+    initial_value(), name="initial_value", dtype=dtype)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/ops/variable_scope.py", line 701, in <lambda>
+    shape.as_list(), dtype=dtype, partition_info=partition_info)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/ops/init_ops.py", line 93, in __call__
+    return array_ops.zeros(shape, dtype)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/ops/array_ops.py", line 1401, in zeros
+    output = constant(zero, shape=shape, dtype=dtype, name=name)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/framework/constant_op.py", line 106, in constant
+    attrs={"value": tensor_value, "dtype": dtype_value}, name=name).outputs[0]
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/framework/ops.py", line 2630, in create_op
+    original_op=self._default_original_op, op_def=op_def)
+  File "/usr/local/lib/python3.5/dist-packages/tensorflow/python/framework/ops.py", line 1204, in __init__
+    self._traceback = self._graph._extract_stack()  # pylint: disable=protected-access
+
+ResourceExhaustedError (see above for traceback): OOM when allocating tensor of shape [384] and type float
+	 [[Node: local3/biases/Momentum/Initializer/zeros = Const[_class=["loc:@local3/biases"], dtype=DT_FLOAT, value=Tensor<type: float shape: [384] values: 0 0 0...>, _device="/job:localhost/replica:0/task:0/gpu:0"]()]]
+
