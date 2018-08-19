@@ -8,7 +8,7 @@
 #SBATCH --qos=cbmm
 
 cd /om/user/sanjanas/minimal-cifar/
-singularity exec -B /om:/om --nv /om/user/xboix/share/belledon-tensorflow-keras-master-latest.simg \
+singularity exec -B /om:/om --nv /om/user/xboix/share/localtensorflow.img \
 python /om/user/sanjanas/minimal-cifar/main.py ${SLURM_ARRAY_TASK_ID}
 
 
