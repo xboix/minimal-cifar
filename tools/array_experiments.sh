@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -n 2
-#SBATCH --array=1-16
+#SBATCH --array=11-17
 #SBATCH --job-name=minimal
 #SBATCH --mem=16GB
 #SBATCH --gres=gpu:titan-x:1
