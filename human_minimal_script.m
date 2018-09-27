@@ -4,13 +4,16 @@
 
 % Orig file with the PNAS paper data
 load 'mircs_for_collaborations.mat'
+print_image_flag = false;
 
 % runnning over all 10 image objects from PNAS
 for mirc_ind = 1:10
 	fprintf('printing %d\n', mirc_ind)
 
 	% print original image:
-	imwrite(mircs(mirc_ind).org_image,sprintf('img%d.png',mirc_ind)) 	
+	if(print_image_flag)
+		imwrite(mircs(mirc_ind).org_image,sprintf('img%d.png',mirc_ind)) 	
+	end
 	
 	% [x,y] center location for minimal images:
 	x = round(0.6*mean(mircs(mirc_ind).mirc_bbox(:,1:2)')'); 
@@ -18,7 +21,7 @@ for mirc_ind = 1:10
 
 	% filter minimal image size:	
 	sz = mircs(mirc_ind).mirc_bbox(:,2)- mircs(mirc_ind).mirc_bbox(:,1);
-	inds = find(and(sz'>0.3*50,sz'<0.5*50));
+	inds = find(and(sz'>0.35*50,sz'<0.45*50));
 	% or, taking all minimal images:
 	% inds = 1:length(y) 
 
@@ -44,7 +47,9 @@ for mirc_ind = 1:10
 	end
 
 	% printing fused map:	
-	imwrite(fused_minimal_map_and_rects,sprintf('map%d.png',mirc_ind))
+	if(print_image_flag)
+		imwrite(fused_minimal_map_and_rects,sprintf('map%d.png',mirc_ind))
+	end
 
 	% raw data:
 	mircs_humans(mirc_ind).img_org = imresize(mircs(mirc_ind).org_image,[30,30]);
