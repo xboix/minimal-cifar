@@ -15,6 +15,8 @@ from util import summary
 # Read experiment to run
 ################################################################################################
 
+print('entered test_minimal')
+
 ID = int(sys.argv[1:][0])
 
 opt = experiments.opt[ID]
@@ -29,6 +31,7 @@ print(opt.name)
 
 ################################################################################################
 # Define training and validation datasets through Dataset API
+print('Defining datasets')
 ################################################################################################
 
 # Initialize dataset and creates TF records if they do not exist
@@ -48,6 +51,7 @@ test_iterator_full = test_dataset_full.make_initializable_iterator()
 
 ################################################################################################
 # Declare DNN
+print('Declaring DNN')
 ################################################################################################
 
 # Get data from dataset dataset
@@ -86,27 +90,36 @@ crop_size = tf.placeholder(tf.int32)
 
 ims = tf.unstack(images_in, num=opt.hyper.batch_size, axis=0)
 
+eccentricity_test = True
+ecc_crop_size = 20
 process_ims = []
 for im in ims: #Get each individual image
     imc = tf.case(pred_fn_pairs=aux_transf(im, crop_size), default=lambda: 0*im)
     imc = tf.image.resize_images(imc, [opt.hyper.image_size, opt.hyper.image_size])
+    if eccentricity_test:
+        imc_small = tf.image.resize_images(imc, [ecc_crop_size, ecc_crop_size])
+        imc_crop = tf.image.central_crop(imc, float(ecc_crop_size) / opt.hyper.image_size)
+        imc = tf.concat([imc_small, imc_crop], 2) 
+
     imc = tf.image.per_image_standardization(imc)
-    imc.set_shape([opt.hyper.image_size, opt.hyper.image_size, 3])
+#     imc.set_shape([opt.hyper.image_size, opt.hyper.image_size, 3])
     process_ims.append(imc)
 
 image = tf.stack(process_ims)
 
-image.set_shape([opt.hyper.batch_size, opt.hyper.image_size, opt.hyper.image_size, 3])
+# image.set_shape([opt.hyper.batch_size, opt.hyper.image_size, opt.hyper.image_size, 3])
 
-if opt.extense_summary:
-    tf.summary.image('input', image)
+# if opt.extense_summary:
+#     tf.summary.image('input', image)
 
 # Call DNN
+print('Calling DNN')
 dropout_rate = tf.placeholder(tf.float32)
 to_call = getattr(nets, opt.dnn.name)
 y, parameters, _ = to_call(image, dropout_rate, opt, dataset.list_labels)
 
 # Accuracy
+print('Getting accuracy')
 with tf.name_scope('accuracy'):
     correct_prediction = tf.equal(tf.argmax(y, 1), y_)
     correct_prediction = tf.cast(correct_prediction, tf.float32)
@@ -119,6 +132,7 @@ with tf.Session() as sess:
 
     ################################################################################################
     # Set up checkpoints and data
+    print('Setting up checkpoints')
     ################################################################################################
 
     saver = tf.train.Saver(max_to_keep=opt.max_to_keep_checkpoints)
@@ -138,6 +152,7 @@ with tf.Session() as sess:
 
     ################################################################################################
     # RUN TEST
+    print('Running test')
     ################################################################################################
 
     results = np.zeros([len(experiments.crop_sizes)])
@@ -164,5 +179,6 @@ with tf.Session() as sess:
     else:
         print("MODEL WAS NOT TRAINED")
 
+print('Saving')
 np.save(opt.log_dir_base + opt.name + '/tmp_results_accuracy' + opt.name + '.npy', results)
-
+print(':)')

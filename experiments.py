@@ -224,3 +224,4 @@ for name_NN, num_layers_NN, max_epochs_NN in zip(name, num_layers, max_epochs):
             int(opt[-1].hyper.num_epochs_per_decay)
 
         idx += 1
+

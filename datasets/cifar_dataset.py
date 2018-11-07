@@ -4,8 +4,8 @@ import pickle
 import numpy as np
 from random import randint
 
-from datasets import dataset
-
+# from datasets import dataset
+import dataset	# TODO change back 
 
 class Cifar10(dataset.Dataset):
 
@@ -41,6 +41,8 @@ class Cifar10(dataset.Dataset):
         perm_y = (perm % 32).astype("uint8")
 
         file_names = glob.glob(self.opt.dataset.dataset_path + "*_batch_*")
+        print(file_names)
+        crash
         for l in file_names:
             d = self.__unpickle(l)
             tmp = dict(d)
@@ -123,3 +125,8 @@ class Cifar10(dataset.Dataset):
             float_image = distorted_image
 
         return float_image
+
+
+if __name__ == '__main__':
+    cifar10 = Cifar10()
+    cifar10.get_data_trainval() 

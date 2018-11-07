@@ -58,24 +58,31 @@ test_iterator_full = test_dataset_full.make_initializable_iterator()
 
 # Get data from dataset dataset
 images_in, y_ = iterator.get_next()
+print('IMAGES_IN SHAPE:', images_in.get_shape())
+images_in_exp = tf.tile(images_in, tf.constant([
 
+# patches = tf.extract_image_patches(
+#     images=images_in,
+#     ksizes=[1, experiments.crop_sizes[crop_size], experiments.crop_sizes[crop_size], 1],
+#     strides=[1, 1, 1, 1],
+#     rates=[1, 1, 1, 1],
+#     padding='VALID')
 
-patches = tf.extract_image_patches(
-    images=images_in,
-    ksizes=[1, experiments.crop_sizes[crop_size], experiments.crop_sizes[crop_size], 1],
-    strides=[1, 1, 1, 1],
-    rates=[1, 1, 1, 1],
-    padding='VALID')
+mask = tf.ones([1, experiments.crop_sizes[crop_size], experiments.crop_sizes[crop_size], 3])
+masks = []
+total_pad = opt.hyper.image_size - experiments.crop_sizes[crop_size]
+for i in range(total_pad + 1):
+    for j in range(total_pad + 1):
+        full_mask = tf.pad(mask, tf.constant([i, total_pad - i], [j, total_pad - j]))
+        full_masks.append(full_mask)
+masks = tf.stack(masks)
+images_in_exp = tf.tile(images_in, tf.constant([masks.get_shape()[0], 1, 1, 1]))
+masked_ims = tf.multiply(images_in, masks)	# mask each tiled image with one of the masks 
 
-map_size = (opt.hyper.image_size - experiments.crop_sizes[crop_size] + 1)
-
-patches = tf.reshape(patches, [-1, experiments.crop_sizes[crop_size], experiments.crop_sizes[crop_size], 3])
-
-patches = tf.image.resize_nearest_neighbor(patches, [opt.hyper.image_size, opt.hyper.image_size])
-
-ims = tf.unstack(patches, num=map_size**2, axis=0)
+# ims = tf.unstack(patches, num=map_size**2, axis=0)
+ims = tf.unstack(masked_ims)
 process_ims = []
-eccentricity_test = True	# True if testing with eccentricity
+eccentricity_test = False	# True if testing with eccentricity
 ecc_crop_size = 20
 for im in ims: #Get each individual image
     if eccentricity_test:
@@ -170,15 +177,15 @@ with tf.Session() as sess:
             sys.stdout.flush()
 
         with open(opt.log_dir_base + opt.name + '/maps/top/' + str(experiments.crop_sizes[crop_size])
-                  + '/maps.pkl', 'wb') as f:
+                  + '/maps_pad.pkl', 'wb') as f:
             pickle.dump(pred_map_total, f)
 
         with open(opt.log_dir_base + opt.name + '/maps/confidence/' + str(experiments.crop_sizes[crop_size])
-                 + '/maps.pkl', 'wb') as f:
+                 + '/maps_pad.pkl', 'wb') as f:
             pickle.dump(top_map_total, f)
 
         with open(opt.log_dir_base + opt.name + '/maps/top_multi/' + str(experiments.crop_sizes[crop_size])
-                 + '/maps.pkl', 'wb') as f:
+                 + '/maps_pad.pkl', 'wb') as f:
             pickle.dump(top_multi_total, f)
 
     else:

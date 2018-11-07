@@ -39,7 +39,7 @@ def Alexnet(x, opt, labels_id, dropout_rate):
     # conv1
     with tf.variable_scope('conv1', reuse=reuse) as scope:
         kernel = tf.get_variable(initializer=tf.truncated_normal(
-            [5, 5, 3, int(num_neurons[0])],
+            [5, 5, 6, int(num_neurons[0])], # 3, int(num_neurons[0])],
             stddev=5e-2 , dtype=tf.float32), name='weights')
         conv = tf.nn.conv2d(x, kernel, [1, 1, 1, 1], padding='SAME')
         biases = tf.get_variable(initializer=

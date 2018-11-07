@@ -100,20 +100,39 @@ rand = tf.random_uniform([opt.hyper.batch_size],
 ims = tf.unstack(images_in, num=opt.hyper.batch_size, axis=0)
 rr = tf.unstack(rand, axis=0)
 
+
+
+eccentricity_test = True	# indicating that we are testing eccentricity, i.e. changing the shape 
 process_ims = []
 for im, r in zip(ims, rr): #Get each individual image
     imc = tf.case(pred_fn_pairs=aux_transf(im, r), default=lambda: 0*im)
     imc = tf.image.resize_images(imc, [opt.hyper.image_size, opt.hyper.image_size])
+    
+    # Transform images: crop of side length <ecc_crop_size> concat image resized to side length <ecc_crop_size>
+    ecc_crop_size = 20	# to avoid prohibitively small images TODO check
+
+    if eccentricity_test:
+        imc_small = tf.image.resize_images(imc, [ecc_crop_size, ecc_crop_size])
+        imc_crop = tf.image.central_crop(imc, float(ecc_crop_size) / opt.hyper.image_size)
+        imc = tf.concat([imc_small, imc_crop], 2)	# concatenate along RGB axis
+
     imc = tf.image.per_image_standardization(imc)
-    imc.set_shape([opt.hyper.image_size, opt.hyper.image_size, 3])
+    if eccentricity_test:	# TODO check 
+        imc.set_shape([ecc_crop_size, ecc_crop_size, 6])
+    else:
+        imc.set_shape([opt.hyper.image_size, opt.hyper.image_size, 3])
     process_ims.append(imc)
 
 image = tf.stack(process_ims)
 
-image.set_shape([opt.hyper.batch_size, opt.hyper.image_size, opt.hyper.image_size, 3])
+# if eccentricity_test:	# TODO check
+#     image.set_shape([opt.hyper.batch_size, ecc_crop_size, ecc_crop_size, 6])
+# else:
+#     image.set_shape([opt.hyper.batch_size, opt.hyper.image_size, opt.hyper.image_size, 3])
+    
 
-if opt.extense_summary:
-    tf.summary.image('input', image)
+# if opt.extense_summary:	# commented out because tf.summary.image doesn't allow 6-channel images
+#     tf.summary.image('input', image)
 
 # Call DNN
 dropout_rate = tf.placeholder(tf.float32)

@@ -9,6 +9,8 @@ ID = int(sys.argv[1:][0])
 
 opt = experiments.opt[ID]
 
+PATH_TO_DATA = '/om/user/sanjanas/min-img-data/position-min-img/'
+
 
 def create_location_minimal_image_maps_multi(image_id, top5map_general, loose, k=1):
     '''
@@ -68,7 +70,7 @@ def create_location_minimal_image_maps_multi(image_id, top5map_general, loose, k
                         top5map[i, j] = self  # reset current cell
 
     #  save map
-    ''' 
+    '''
     if amount_loose:
         np.save(PATH_TO_DATA + settings.map_filename(settings.TOP5_MAPTYPE, crop_metric, model_name, image_scale,
                                                      image_id) + '_lmap.npy', M)
@@ -85,7 +87,7 @@ def create_location_minimal_image_maps_multi(image_id, top5map_general, loose, k
 
 
 
-def create_location_minimal_image_maps(image_id, top5map, loose, k=1):
+def create_location_minimal_image_maps(image_id, top5map, loose, crop_metric, k=1):
     '''
     image_id (int): the small dataset id of the image we are finding minimal images for
     crop_metric (float): the crop metric we are referencing
@@ -137,13 +139,15 @@ def create_location_minimal_image_maps(image_id, top5map, loose, k=1):
                     top5map[i, j] = self  # reset current cell
 
     #  save map
-    ''' 
-    if amount_loose:
-        np.save(PATH_TO_DATA + settings.map_filename(settings.TOP5_MAPTYPE, crop_metric, model_name, image_scale,
-                                                     image_id) + '_lmap.npy', M)
-    else:
-        np.save(PATH_TO_DATA + settings.map_filename(settings.TOP5_MAPTYPE, crop_metric, model_name, image_scale,
-                                                     image_id) + '_map.npy', M)
+    '''
+    if image_id in [0, 5000, 9999] and ID in [11, 16] and crop_metric in [12, 20]: 
+        if loose:
+        # np.save(PATH_TO_DATA + settings.map_filename(settings.TOP5_MAPTYPE, crop_metric, model_name, image_scale, image_id) + '_lmap.npy', M
+            pooling_size = 3 if ID == 11 else 32 
+            np.save(PATH_TO_DATA + str(image_id) + '_' + str(pooling_size) + '_' + str(crop_metric) + '_lmap.npy', M)
+        # else:
+        # np.save(PATH_TO_DATA + settings.map_filename(settings.TOP5_MAPTYPE, crop_metric, model_name, image_scale, image_id) + '_map.npy', M)
+        #     np.save(PATH_TO_DATA + str(image_id) + 'map.npy', M)
     '''
 
     # calculate map statistics
@@ -155,11 +159,14 @@ def create_location_minimal_image_maps(image_id, top5map, loose, k=1):
 TOTAL = 10000
 results = - np.ones([5, 2, 5, TOTAL, 2])
 
+remove_edges = False	# remove two rows/columns from each side for position experiment
 
 for idx_metric, crop_metric in enumerate(experiments.crop_sizes):
 
     with open(opt.log_dir_base + opt.name + '/maps/top/' + str(crop_metric) + '/maps.pkl', 'rb') as f:
         top5map = pickle.load(f)
+        if remove_edges:
+            top5map = top5map[:, 2:, :-3]
 
     print(idx_metric)
     sys.stdout.flush()
@@ -169,7 +176,7 @@ for idx_metric, crop_metric in enumerate(experiments.crop_sizes):
             sys.stdout.flush()
             for image_id in range(TOTAL):
                 a, b = \
-                    create_location_minimal_image_maps(image_id, top5map, loose, k)
+                    create_location_minimal_image_maps(image_id, top5map, loose, crop_metric, k)
                 results[idx_metric][idx_loose][idx_k][image_id][0] = a
                 results[idx_metric][idx_loose][idx_k][image_id][1] = b
 
@@ -182,6 +189,8 @@ for idx_metric, crop_metric in enumerate(experiments.crop_sizes):
 
     with open(opt.log_dir_base + opt.name + '/maps/top_multi/' + str(crop_metric) + '/maps.pkl', 'rb') as f:
         top5map = pickle.load(f)
+        if remove_edges:
+            top5map = top5map[:, 2:, :-3]
 
     print(idx_metric)
     sys.stdout.flush()
@@ -196,6 +205,5 @@ for idx_metric, crop_metric in enumerate(experiments.crop_sizes):
                 results[idx_metric][idx_loose][idx_k][image_id][1] = b
 
         np.save(opt.log_dir_base + opt.name + '/tmp_results_multi' +  opt.name + '.npy', results)
-
 print(':)')
 sys.stdout.flush()

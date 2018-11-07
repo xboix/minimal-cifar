@@ -60,42 +60,49 @@ test_iterator_full = test_dataset_full.make_initializable_iterator()
 images_in, y_ = iterator.get_next()
 
 
-patches = tf.extract_image_patches(
-    images=images_in,
-    ksizes=[1, experiments.crop_sizes[crop_size], experiments.crop_sizes[crop_size], 1],
-    strides=[1, 1, 1, 1],
-    rates=[1, 1, 1, 1],
-    padding='VALID')
+#patches = tf.extract_image_patches(
+#    images=images_in,
+#    ksizes=[1, experiments.crop_sizes[crop_size], experiments.crop_sizes[crop_size], 1],
+#    strides=[1, 1, 1, 1],
+#    rates=[1, 1, 1, 1],
+#    padding='VALID')
+#
+map_size = (opt.hyper.image_size - experiments.crop_sizes[crop_size]) # + 1)	# in this case, no + 1
+#
+#patches = tf.reshape(patches, [-1, experiments.crop_sizes[crop_size], experiments.crop_sizes[crop_size], 3])
+#
+#patches = tf.image.resize_nearest_neighbor(patches, [opt.hyper.image_size, opt.hyper.image_size])
+# TODO make a padded tensor for every positioning of the resized image, put in a list (for resizing, use experiments.crop_sizes[crop_size]) 
+# call this list of tensors "ims" and remove line 78 - from there, program can continue - make sure the dimensions match. 
+resize_image = tf.image.resize_images(images_in, [experiments.crop_sizes[crop_size], experiments.crop_sizes[crop_size]])	# TODO check if this should be resize_nearest_neighbor
+dropout_rate = tf.placeholder(tf.float32)
+total_zeros = 32 - experiments.crop_sizes[crop_size]
 
-map_size = (opt.hyper.image_size - experiments.crop_sizes[crop_size] + 1)
+ims = [tf.pad(resize_image, tf.constant([[0, 0],
+                                         [r, total_zeros - r], 
+                                         [c, total_zeros - c],
+                                         [0, 0]])) for c in range(total_zeros) for r in range(total_zeros)]
+ims = [tf.reshape(im, [32, 32, 3]) for im in ims]
 
-patches = tf.reshape(patches, [-1, experiments.crop_sizes[crop_size], experiments.crop_sizes[crop_size], 3])
 
-patches = tf.image.resize_nearest_neighbor(patches, [opt.hyper.image_size, opt.hyper.image_size])
-
-ims = tf.unstack(patches, num=map_size**2, axis=0)
+# ims = tf.unstack(patches, num=map_size**2, axis=0)
 process_ims = []
-eccentricity_test = True	# True if testing with eccentricity
-ecc_crop_size = 20
 for im in ims: #Get each individual image
-    if eccentricity_test:
-       imc_small = tf.image.resize_images(im, [ecc_crop_size, ecc_crop_size])
-       imc_crop = tf.image.central_crop(im, float(ecc_crop_size) / opt.hyper.image_size)
-       im = tf.concat([imc_small, imc_crop], 2) 
+    a = tf.size(im)
+    # with tf.Session() as sess:
+    #     test_handle_full = sess.run(test_iterator_full.string_handle())
+    # print(a.eval(session=sess, feed_dict={handle: test_handle_full, dropout_rate: opt.hyper.drop_test}))
+    
     imc = tf.image.per_image_standardization(im)
-    if eccentricity_test:
-        imc.set_shape([ecc_crop_size, ecc_crop_size, 6])
-    else:
-        imc.set_shape([opt.hyper.image_size, opt.hyper.image_size, 3])
+    imc.set_shape([opt.hyper.image_size, opt.hyper.image_size, 3])
     process_ims.append(imc)
 
 image = tf.stack(process_ims)
 
-# if opt.extense_summary:
-#     tf.summary.image('input', image)
+if opt.extense_summary:
+    tf.summary.image('input', image)
 
 # Call DNN
-dropout_rate = tf.placeholder(tf.float32)
 to_call = getattr(nets, opt.dnn.name)
 y, parameters, _ = to_call(image, dropout_rate, opt, dataset.list_labels)
 
@@ -165,8 +172,7 @@ with tf.Session() as sess:
             pred_map_total[num_iter, :, :] = np.reshape(pred_map,[map_size, map_size])
             top_map_total[num_iter, :, :] = np.reshape(top_map[:, gt[0]], [map_size, map_size])
             top_multi_total[num_iter, :, :] = np.reshape(top_multi_map, [map_size, map_size])
-            if not num_iter % 1000:
-                print(num_iter)
+            print(num_iter)
             sys.stdout.flush()
 
         with open(opt.log_dir_base + opt.name + '/maps/top/' + str(experiments.crop_sizes[crop_size])
@@ -184,4 +190,4 @@ with tf.Session() as sess:
     else:
         print("MODEL WAS NOT TRAINED")
 
-print(":)")
+print(":)")1
